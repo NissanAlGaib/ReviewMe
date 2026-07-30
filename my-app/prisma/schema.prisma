@@ -1,0 +1,161 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Auth (Better Auth) ----------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  questionSets QuestionSet[]
+  quizAttempts QuizAttempt[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ---------- App domain ----------
+
+enum QuestionSetStatus {
+  DRAFT
+  READY
+}
+
+model QuestionSet {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  examType  String?
+  status    QuestionSetStatus @default(DRAFT)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  sourceUploads SourceUpload[]
+  questions     Question[]
+  quizAttempts  QuizAttempt[]
+
+  @@index([userId])
+}
+
+enum UploadKind {
+  QUESTION_SOURCE
+  ANSWER_KEY
+}
+
+model SourceUpload {
+  id            String      @id @default(cuid())
+  questionSetId String
+  questionSet   QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  kind          UploadKind
+  blobUrl       String
+  blobPathname  String
+  mimeType      String
+  originalName  String
+  sizeBytes     Int
+  createdAt     DateTime    @default(now())
+
+  @@index([questionSetId])
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  IDENTIFICATION
+}
+
+model Question {
+  id            String       @id @default(cuid())
+  questionSetId String
+  questionSet   QuestionSet  @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  order         Int
+  type          QuestionType
+  questionText  String
+  choices       Json?
+  correctAnswer String
+  explanation   String?
+  aiConfidence  String?
+
+  quizAnswers QuizAnswer[]
+
+  @@index([questionSetId])
+}
+
+model QuizAttempt {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionSetId  String
+  questionSet    QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  score          Int
+  totalQuestions Int
+  takenAt        DateTime    @default(now())
+
+  answers QuizAnswer[]
+
+  @@index([userId])
+  @@index([questionSetId])
+}
+
+model QuizAnswer {
+  id         String      @id @default(cuid())
+  attemptId  String
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userAnswer String?
+  isCorrect  Boolean
+
+  @@unique([attemptId, questionId])
+}
