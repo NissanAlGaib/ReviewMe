@@ -25,6 +25,7 @@ export const ReviewedQuestionSchema = z.object({
   order: z.number().int().nonnegative(),
   type: QuestionTypeSchema,
   questionText: z.string().trim().min(1, "Question text is required."),
+  topic: z.string().trim().min(1).nullable(),
   choices: z
     .array(
       z.object({

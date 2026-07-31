@@ -40,6 +40,7 @@ export async function getQuestionsForQuiz(id: string, userId: string) {
       order: q.order,
       type: q.type,
       questionText: q.questionText,
+      topic: q.topic,
       choices: q.choices,
     })),
   };

@@ -36,11 +36,11 @@ export function ExtractButton({ questionSetId }: { questionSetId: string }) {
         type="button"
         onClick={handleClick}
         disabled={isExtracting}
-        className="w-fit rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+        className="flex h-[46px] w-fit items-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50"
       >
         {isExtracting ? "Extracting questions… this can take a minute" : "Run AI extraction"}
       </button>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   );
 }

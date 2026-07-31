@@ -17,12 +17,5 @@ export default async function QuizPage({
     redirect(`/question-sets/${id}/review`);
   }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-        {questionSet.title}
-      </h1>
-      <QuizForm questionSetId={questionSet.id} questions={questionSet.questions} />
-    </div>
-  );
+  return <QuizForm questionSetId={questionSet.id} questions={questionSet.questions} />;
 }

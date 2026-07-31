@@ -4,6 +4,7 @@ export const ExtractedQuestionSchema = z.object({
   order: z.number().int().nonnegative(),
   type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "IDENTIFICATION"]),
   questionText: z.string().min(1),
+  topic: z.string().min(1).nullable(),
   choices: z
     .array(
       z.object({

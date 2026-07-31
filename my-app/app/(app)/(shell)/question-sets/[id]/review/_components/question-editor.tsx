@@ -12,6 +12,7 @@ type EditableQuestion = {
   key: string;
   type: QuestionType;
   questionText: string;
+  topic: string;
   choices: Choice[] | null;
   correctAnswer: string;
   explanation: string;
@@ -22,6 +23,7 @@ type InitialQuestion = {
   id: string;
   type: QuestionType;
   questionText: string;
+  topic: string | null;
   choices: unknown;
   correctAnswer: string;
   explanation: string | null;
@@ -33,6 +35,7 @@ function toEditable(q: InitialQuestion): EditableQuestion {
     key: q.id,
     type: q.type,
     questionText: q.questionText,
+    topic: q.topic ?? "",
     choices: Array.isArray(q.choices) ? (q.choices as Choice[]) : null,
     correctAnswer: q.correctAnswer,
     explanation: q.explanation ?? "",
@@ -45,6 +48,7 @@ function blankQuestion(): EditableQuestion {
     key: crypto.randomUUID(),
     type: "MULTIPLE_CHOICE",
     questionText: "",
+    topic: "",
     choices: [
       { label: "A", text: "" },
       { label: "B", text: "" },
@@ -54,6 +58,11 @@ function blankQuestion(): EditableQuestion {
     aiConfidence: null,
   };
 }
+
+const selectClass =
+  "inline-block w-fit rounded-lg border-[1.5px] border-ink/30 bg-transparent px-3 py-1.5 font-sans text-[13px] font-semibold text-ink outline-none";
+const textInputClass =
+  "w-full rounded-[10px] border-[1.5px] border-ink/20 bg-transparent px-3.5 py-2.5 font-sans text-sm leading-relaxed text-ink outline-none focus:border-ink";
 
 export function QuestionEditor({
   questionSetId,
@@ -139,6 +148,7 @@ export function QuestionEditor({
           order: index,
           type: q.type,
           questionText: q.questionText,
+          topic: q.topic.trim() || null,
           choices: q.choices,
           correctAnswer: q.correctAnswer,
           explanation: q.explanation || null,
@@ -151,100 +161,119 @@ export function QuestionEditor({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-[14px]">
       {questions.map((q, i) => (
         <div
           key={q.key}
-          className="flex flex-col gap-3 rounded-md border border-black/[.08] p-4 dark:border-white/[.145]"
+          className="flex flex-col gap-[14px] rounded-[14px] border-[1.5px] border-ink p-5"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-zinc-500">Question {i + 1}</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-mono text-[11px] font-bold tracking-[.06em] text-faint">
+              QUESTION {i + 1}
+            </span>
             <div className="flex items-center gap-3">
               {q.aiConfidence === "low" && (
-                <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                <span className="rounded-full bg-[#fef3c7] px-2.5 py-[3px] font-sans text-[11px] font-bold text-[#92400e]">
                   Low confidence — double-check
                 </span>
               )}
               <button
                 type="button"
                 onClick={() => removeQuestion(q.key)}
-                className="text-xs text-red-600 hover:underline dark:text-red-400"
+                className="font-sans text-xs font-semibold text-[#b91c1c] hover:underline"
               >
                 Delete
               </button>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Type</label>
-            <select
-              value={q.type}
-              onChange={(e) => changeType(q.key, e.target.value as QuestionType)}
-              className="w-fit rounded-md border border-black/[.08] bg-transparent px-2 py-1 text-sm dark:border-white/[.145]"
-            >
-              <option value="MULTIPLE_CHOICE">Multiple choice</option>
-              <option value="TRUE_FALSE">True / False</option>
-              <option value="IDENTIFICATION">Identification</option>
-            </select>
+          <div className="flex flex-wrap gap-5">
+            <div>
+              <div className="field-label">Type</div>
+              <select
+                value={q.type}
+                onChange={(e) => changeType(q.key, e.target.value as QuestionType)}
+                className={selectClass}
+              >
+                <option value="MULTIPLE_CHOICE">Multiple choice</option>
+                <option value="TRUE_FALSE">True / False</option>
+                <option value="IDENTIFICATION">Identification</option>
+              </select>
+            </div>
+
+            <div>
+              <div className="field-label">Topic (optional)</div>
+              <input
+                value={q.topic}
+                onChange={(e) => updateQuestion(q.key, { topic: e.target.value })}
+                placeholder="e.g. Assessment"
+                className={selectClass}
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-              Question text
-            </label>
+          <div>
+            <div className="field-label">Question text</div>
             <textarea
               value={q.questionText}
               onChange={(e) => updateQuestion(q.key, { questionText: e.target.value })}
               rows={2}
-              className="rounded-md border border-black/[.08] bg-transparent px-3 py-2 text-sm outline-none focus:border-zinc-950 dark:border-white/[.145] dark:focus:border-zinc-50"
+              className={textInputClass}
             />
           </div>
 
           {q.type === "MULTIPLE_CHOICE" && q.choices && (
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                Choices
-              </label>
-              {q.choices.map((choice, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <input
-                    value={choice.label}
-                    onChange={(e) => updateChoice(q.key, index, { label: e.target.value })}
-                    className="w-12 rounded-md border border-black/[.08] bg-transparent px-2 py-1 text-sm dark:border-white/[.145]"
-                  />
-                  <input
-                    value={choice.text}
-                    onChange={(e) => updateChoice(q.key, index, { text: e.target.value })}
-                    className="flex-1 rounded-md border border-black/[.08] bg-transparent px-2 py-1 text-sm dark:border-white/[.145]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeChoice(q.key, index)}
-                    className="text-xs text-red-600 hover:underline dark:text-red-400"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => addChoice(q.key)}
-                className="w-fit text-xs text-zinc-600 hover:underline dark:text-zinc-400"
-              >
-                + Add choice
-              </button>
+            <div>
+              <div className="field-label">Choices</div>
+              <div className="flex flex-col gap-2">
+                {q.choices.map((choice, index) => {
+                  const isCorrect = choice.label !== "" && choice.label === q.correctAnswer;
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        value={choice.label}
+                        onChange={(e) => updateChoice(q.key, index, { label: e.target.value })}
+                        className={`w-9 rounded-lg border-[1.5px] py-1.5 text-center font-mono text-[13px] font-bold ${
+                          isCorrect
+                            ? "border-ink bg-ink text-cream"
+                            : "border-ink/20 bg-transparent text-ink"
+                        }`}
+                      />
+                      <input
+                        value={choice.text}
+                        onChange={(e) => updateChoice(q.key, index, { text: e.target.value })}
+                        className={`flex-1 rounded-lg border-[1.5px] px-3 py-1.5 font-sans text-[13px] outline-none focus:border-ink ${
+                          isCorrect ? "border-ink bg-[#faf6e9] font-semibold" : "border-ink/20"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeChoice(q.key, index)}
+                        className="font-sans text-xs font-semibold text-[#b91c1c] hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => addChoice(q.key)}
+                  className="w-fit font-sans text-xs font-semibold text-amber hover:underline"
+                >
+                  + Add choice
+                </button>
+              </div>
             </div>
           )}
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-              Correct answer
-            </label>
+          <div>
+            <div className="field-label">Correct answer</div>
             {q.type === "MULTIPLE_CHOICE" && q.choices ? (
               <select
                 value={q.correctAnswer}
                 onChange={(e) => updateQuestion(q.key, { correctAnswer: e.target.value })}
-                className="w-fit rounded-md border border-black/[.08] bg-transparent px-2 py-1 text-sm dark:border-white/[.145]"
+                className={selectClass}
               >
                 <option value="">Select the correct choice…</option>
                 {q.choices.map((choice, index) => (
@@ -257,7 +286,7 @@ export function QuestionEditor({
               <select
                 value={q.correctAnswer}
                 onChange={(e) => updateQuestion(q.key, { correctAnswer: e.target.value })}
-                className="w-fit rounded-md border border-black/[.08] bg-transparent px-2 py-1 text-sm dark:border-white/[.145]"
+                className={selectClass}
               >
                 <option value="">Select…</option>
                 <option value="True">True</option>
@@ -267,20 +296,18 @@ export function QuestionEditor({
               <input
                 value={q.correctAnswer}
                 onChange={(e) => updateQuestion(q.key, { correctAnswer: e.target.value })}
-                className="rounded-md border border-black/[.08] bg-transparent px-3 py-2 text-sm dark:border-white/[.145]"
+                className={textInputClass}
               />
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-              Explanation (optional)
-            </label>
+          <div>
+            <div className="field-label">Explanation (optional)</div>
             <textarea
               value={q.explanation}
               onChange={(e) => updateQuestion(q.key, { explanation: e.target.value })}
               rows={2}
-              className="rounded-md border border-black/[.08] bg-transparent px-3 py-2 text-sm outline-none focus:border-zinc-950 dark:border-white/[.145] dark:focus:border-zinc-50"
+              className={textInputClass}
             />
           </div>
         </div>
@@ -289,18 +316,18 @@ export function QuestionEditor({
       <button
         type="button"
         onClick={addQuestion}
-        className="w-fit rounded-md border border-black/[.08] px-4 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-white/[.145] dark:hover:bg-zinc-900"
+        className="flex h-[42px] w-fit items-center rounded-[10px] border-[1.5px] border-ink px-[18px] font-sans text-[13px] font-bold text-ink"
       >
         + Add question
       </button>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       <button
         type="button"
         onClick={handleSave}
         disabled={isSaving}
-        className="w-fit rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+        className="flex h-[46px] w-fit items-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50"
       >
         {isSaving ? "Saving…" : "Save and mark ready"}
       </button>

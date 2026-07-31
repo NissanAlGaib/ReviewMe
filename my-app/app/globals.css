@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f0e6;
+  --foreground: #18172f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-cream: #f4f0e6;
+  --color-paper: #fffdf6;
+  --color-ink: #18172f;
+  --color-amber: #b45309;
+  --color-amber-dark: #92400e;
+  --color-muted: #6b6353;
+  --color-faint: #9a917a;
+  --shadow-ticket: 9px 9px 0 rgba(24, 23, 47, 0.92);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--color-amber);
+}
+a:hover {
+  color: var(--color-amber-dark);
+}
+
+@keyframes ticket-pop {
+  0% {
+    transform: translateY(4px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ticket-pop {
+  animation: ticket-pop 0.25s ease;
+}
+
+.stage {
+  background-image: radial-gradient(rgba(24, 23, 47, 0.1) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-color: var(--color-cream);
+}
+
+.ticket {
+  background: var(--color-paper);
+  border: 1.5px solid var(--color-ink);
+  border-radius: 18px;
+  box-shadow: var(--shadow-ticket);
+  overflow: hidden;
+}
+
+/* Dashed perforation strip with punched-hole notches on each side. The notch
+   color must match whatever sits behind the ticket (the page's cream stage)
+   so it reads as a hole cut through the card, not a filled circle. */
+.perf {
+  position: relative;
+  height: 0;
+  border-top: 2px dashed rgba(255, 255, 255, 0.35);
+}
+.perf::before,
+.perf::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-cream);
+}
+.perf::before {
+  left: -9px;
+}
+.perf::after {
+  right: -9px;
+}
+
+.field-label {
+  font: 700 10.5px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+  margin-bottom: 7px;
+}
+
+.field-input {
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid rgba(24, 23, 47, 0.25);
+  background: transparent;
+  padding: 8px 2px;
+  font: 600 15px var(--font-sans);
+  color: var(--color-ink);
+  outline: none;
+}
+.field-input:focus {
+  border-bottom-color: var(--color-ink);
+}
+
+.ticket-row:hover {
+  background: #faf7ec;
 }

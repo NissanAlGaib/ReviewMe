@@ -52,6 +52,7 @@ export type ReviewedQuestionInput = {
   order: number;
   type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "IDENTIFICATION";
   questionText: string;
+  topic: string | null;
   choices: { label: string; text: string }[] | null;
   correctAnswer: string;
   explanation: string | null;
@@ -83,6 +84,7 @@ export async function saveReviewedQuestions(input: SaveReviewedQuestionsInput) {
         order: q.order,
         type: q.type,
         questionText: q.questionText,
+        topic: q.topic,
         choices: q.choices ?? undefined,
         correctAnswer: q.correctAnswer,
         explanation: q.explanation,

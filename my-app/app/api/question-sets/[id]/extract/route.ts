@@ -58,6 +58,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
           order: q.order,
           type: q.type,
           questionText: q.questionText,
+          topic: q.topic,
           choices: q.choices ?? undefined,
           correctAnswer: q.correctAnswer,
           explanation: q.explanation,

@@ -13,37 +13,37 @@ export default async function ReviewPage({
   const questionSet = await getQuestionSetOwned(id, user.id);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-[22px]">
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+        <div className="font-sans text-2xl font-extrabold tracking-tight text-ink">
           {questionSet.title}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        </div>
+        <div className="mt-[5px] font-sans text-[13px] font-medium text-muted">
           {questionSet.sourceUploads.length} file
           {questionSet.sourceUploads.length === 1 ? "" : "s"} uploaded · status:{" "}
           {questionSet.status}
-        </p>
+        </div>
       </div>
 
-      <ul className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {questionSet.sourceUploads.map((upload) => (
-          <li
+          <div
             key={upload.id}
-            className="flex items-center justify-between rounded-md border border-black/[.08] px-4 py-2 text-sm dark:border-white/[.145]"
+            className="flex items-center justify-between rounded-[10px] border-[1.5px] border-ink px-4 py-2.5 font-sans text-[13px] font-semibold text-ink"
           >
             <span>{upload.originalName}</span>
-            <span className="text-xs uppercase text-zinc-500">{upload.kind}</span>
-          </li>
+            <span className="font-mono text-[10px] font-bold tracking-[.06em] text-muted">
+              {upload.kind === "QUESTION_SOURCE" ? "QUESTION SOURCE" : "ANSWER KEY"}
+            </span>
+          </div>
         ))}
-      </ul>
+      </div>
 
       <ExtractButton questionSetId={questionSet.id} />
 
       {questionSet.questions.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-            Review extracted questions
-          </h2>
+        <div className="flex flex-col gap-[14px]">
+          <div className="font-sans text-sm font-bold text-ink">Review extracted questions</div>
           <QuestionEditor
             questionSetId={questionSet.id}
             initialQuestions={questionSet.questions}

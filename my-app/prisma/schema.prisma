@@ -122,6 +122,7 @@ model Question {
   order         Int
   type          QuestionType
   questionText  String
+  topic         String?
   choices       Json?
   correctAnswer String
   explanation   String?

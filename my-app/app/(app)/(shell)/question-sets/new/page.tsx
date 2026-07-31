@@ -88,79 +88,89 @@ export default function NewQuestionSetPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-[560px] flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+        <div className="font-sans text-2xl font-extrabold tracking-tight text-ink">
           New question set
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        </div>
+        <div className="mt-[5px] font-sans text-[13px] font-medium text-muted">
           Upload photos or PDFs of exam questions, optionally with a separate answer key.
-        </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="title" className="text-sm font-medium">
-            Title
-          </label>
+        <div>
+          <div className="field-label">Title</div>
           <input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. LET Professional Education - Set 1"
-            className="rounded-md border border-black/[.08] bg-transparent px-3 py-2 text-sm outline-none focus:border-zinc-950 dark:border-white/[.145] dark:focus:border-zinc-50"
+            className="field-input"
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="examType" className="text-sm font-medium">
-            Exam type (optional)
-          </label>
+        <div>
+          <div className="field-label">Exam type (optional)</div>
           <input
             id="examType"
             value={examType}
             onChange={(e) => setExamType(e.target.value)}
             placeholder="e.g. LET, BAR"
-            className="rounded-md border border-black/[.08] bg-transparent px-3 py-2 text-sm outline-none focus:border-zinc-950 dark:border-white/[.145] dark:focus:border-zinc-50"
+            className="field-input"
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="questionFiles" className="text-sm font-medium">
-            Question images / PDFs
+        <div>
+          <div className="field-label">Question images / PDFs</div>
+          <label className="relative flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/30 px-[18px] py-[18px] text-center font-sans text-[13px] font-semibold text-muted">
+            <input
+              id="questionFiles"
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
+              onChange={(e) => setQuestionFiles(e.target.files)}
+              className="absolute inset-0 cursor-pointer opacity-0"
+            />
+            {questionFiles && questionFiles.length > 0 ? (
+              <span>
+                {questionFiles.length} file{questionFiles.length === 1 ? "" : "s"} selected
+              </span>
+            ) : (
+              <span>
+                Drop files here or <span className="text-amber underline">browse</span>
+              </span>
+            )}
           </label>
-          <input
-            id="questionFiles"
-            type="file"
-            multiple
-            accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
-            onChange={(e) => setQuestionFiles(e.target.files)}
-            className="text-sm"
-          />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="answerKeyFile" className="text-sm font-medium">
-            Answer key (optional)
+        <div>
+          <div className="field-label">Answer key (optional)</div>
+          <label className="relative flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/30 px-[18px] py-[18px] text-center font-sans text-[13px] font-semibold text-muted">
+            <input
+              id="answerKeyFile"
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
+              onChange={(e) => setAnswerKeyFile(e.target.files)}
+              className="absolute inset-0 cursor-pointer opacity-0"
+            />
+            {answerKeyFile && answerKeyFile.length > 0 ? (
+              <span>{answerKeyFile[0].name}</span>
+            ) : (
+              <span>
+                Drop file here or <span className="text-amber underline">browse</span>
+              </span>
+            )}
           </label>
-          <input
-            id="answerKeyFile"
-            type="file"
-            accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
-            onChange={(e) => setAnswerKeyFile(e.target.files)}
-            className="text-sm"
-          />
         </div>
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-        {progress && (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">{progress}</p>
-        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {progress && <p className="font-sans text-[13px] font-medium text-muted">{progress}</p>}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 sm:w-fit"
+          className="flex h-12 w-fit items-center rounded-xl bg-ink px-[22px] font-sans text-sm font-bold text-cream disabled:opacity-50"
         >
           {isSubmitting ? "Uploading…" : "Upload and continue"}
         </button>

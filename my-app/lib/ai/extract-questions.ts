@@ -25,6 +25,7 @@ Files labeled "QUESTION SOURCE" contain the questions (and possibly choices). Fi
 For each question you find, determine:
 - Its type: MULTIPLE_CHOICE (has lettered/numbered choices), TRUE_FALSE, or IDENTIFICATION (free-text/short-answer, no choices).
 - The question text, and choices if any (with their original label, e.g. "A", "B").
+- A short topic/subject label (2-4 words, e.g. "Teaching & Learning", "Assessment", "Political Law") categorizing what the question is actually about, for grouping performance later. Keep the set of topics small and consistent across questions in the same file rather than inventing a new topic per question.
 - The correct answer: for MULTIPLE_CHOICE, use the choice label; for TRUE_FALSE, "True" or "False"; for IDENTIFICATION, the expected answer text. If no answer key was provided, use your own best-informed answer.
 - Match answers to questions using the visible question number in both files (do not attempt semantic matching of question text).
 - A short explanation if the source material provides one, otherwise null.
@@ -48,6 +49,7 @@ const EXTRACTION_RESPONSE_SCHEMA: Schema = {
             enum: ["MULTIPLE_CHOICE", "TRUE_FALSE", "IDENTIFICATION"],
           },
           questionText: { type: Type.STRING },
+          topic: { type: Type.STRING, nullable: true },
           choices: {
             type: Type.ARRAY,
             nullable: true,
@@ -68,6 +70,7 @@ const EXTRACTION_RESPONSE_SCHEMA: Schema = {
           "order",
           "type",
           "questionText",
+          "topic",
           "choices",
           "correctAnswer",
           "explanation",
