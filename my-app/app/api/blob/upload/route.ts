@@ -4,7 +4,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 import { auth } from "@/lib/auth";
 
-// Must match what the Claude vision API accepts (image/gif, image/webp, image/jpeg, image/png, application/pdf) —
+// Must match what the Gemini API accepts (image/gif, image/webp, image/jpeg, image/png, application/pdf) —
 // there's no format-conversion step, so anything else would fail at extraction time, not at upload time.
 const ALLOWED_CONTENT_TYPES = [
   "image/jpeg",
