@@ -24,7 +24,7 @@ export default function LoginPage() {
 
   return (
     <div className="ticket flex flex-col">
-      <div className="bg-ink px-6 pt-6 pb-[18px] text-center text-cream">
+      <div className="rounded-t-[18px] bg-ink px-6 pt-6 pb-[18px] text-center text-cream">
         <div className="font-mono text-[11px] font-bold tracking-[.16em]">★ ADMIT ONE ★</div>
         <div className="mt-2 font-sans text-xl font-extrabold tracking-tight">ReviewMe</div>
       </div>

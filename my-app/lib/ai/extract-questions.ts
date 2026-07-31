@@ -104,7 +104,7 @@ export async function extractQuestions(files: ExtractionFile[]): Promise<Extract
     config: {
       responseMimeType: "application/json",
       responseSchema: EXTRACTION_RESPONSE_SCHEMA,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 65536,
     },
   });
 
@@ -112,6 +112,22 @@ export async function extractQuestions(files: ExtractionFile[]): Promise<Extract
     throw new Error("Gemini did not return a parseable extraction result.");
   }
 
+  // A response cut off mid-JSON (too many files/questions for the output budget) fails
+  // JSON.parse with an opaque "Unexpected end of JSON input" — check finishReason first
+  // so that case gets a message pointing at the actual cause instead.
+  if (response.candidates?.[0]?.finishReason === "MAX_TOKENS") {
+    throw new Error(
+      "The AI's response was too long to finish (too many files or questions in one set). Try splitting this into smaller question sets."
+    );
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(response.text);
+  } catch {
+    throw new Error("Gemini returned a malformed extraction result. Please try again.");
+  }
+
   // Structured output constrains the model but doesn't replace validating the result ourselves.
-  return ExtractionResultSchema.parse(JSON.parse(response.text));
+  return ExtractionResultSchema.parse(parsed);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { submitQuizAttempt } from "@/actions/quiz";
 
@@ -33,6 +34,7 @@ export function QuizForm({
   questionSetId: string;
   questions: QuizQuestion[];
 }) {
+  const router = useRouter();
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [flagged, setFlagged] = useState<Record<string, boolean>>({});
@@ -115,6 +117,16 @@ export function QuizForm({
     setIndex((i) => Math.max(0, i - 1));
   }
 
+  function handleBack() {
+    if (index > 0) {
+      goPrev();
+      return;
+    }
+    if (window.confirm("Exit this quiz? Your progress won't be saved.")) {
+      router.push("/dashboard");
+    }
+  }
+
   function toggleFlag() {
     setFlagged((prev) => ({ ...prev, [question.id]: !prev[question.id] }));
   }
@@ -124,15 +136,15 @@ export function QuizForm({
 
   return (
     <div className="ticket flex flex-col">
-      <div className="bg-ink px-[22px] pt-[18px] pb-4 text-cream">
+      <div className="rounded-t-[18px] bg-ink px-[22px] pt-[18px] pb-4 text-cream">
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={goPrev}
-            disabled={index === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-cream/35 font-sans text-[17px] font-semibold disabled:opacity-30"
+            onClick={handleBack}
+            aria-label={index === 0 ? "Exit quiz" : "Previous question"}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-cream/35 font-sans text-[17px] font-semibold"
           >
-            ‹
+            {index === 0 ? "×" : "‹"}
           </button>
           <div className="font-mono text-[11px] font-semibold uppercase tracking-[.09em] opacity-75">
             {question.topic || "General"}

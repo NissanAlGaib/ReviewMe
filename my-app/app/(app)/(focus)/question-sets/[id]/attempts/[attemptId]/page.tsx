@@ -58,7 +58,7 @@ export default async function AttemptResultsPage({
 
   return (
     <div className="ticket flex flex-col">
-      <div className="bg-ink px-6 pt-7 pb-5 text-cream">
+      <div className="rounded-t-[18px] bg-ink px-6 pt-7 pb-5 text-cream">
         <div className="font-mono text-[11px] font-semibold uppercase tracking-[.09em] opacity-70">
           {attempt.questionSet.title}
         </div>

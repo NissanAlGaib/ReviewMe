@@ -13,7 +13,7 @@ export default async function ShellLayout({
     <div className="flex flex-1 justify-center px-4 py-7 pb-14">
       <div className="w-full max-w-[960px]">
         <div className="ticket flex flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-ink px-[26px] py-4 text-cream">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-[18px] bg-ink px-[26px] py-4 text-cream">
             <div className="flex flex-wrap items-center gap-[26px]">
               <div className="flex items-center gap-[9px]">
                 <div className="font-mono flex h-[26px] w-[26px] items-center justify-center rounded-full border-[1.5px] border-dashed border-cream/50 text-[10px] font-bold">

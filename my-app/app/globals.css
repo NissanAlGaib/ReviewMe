@@ -59,12 +59,16 @@ a:hover {
   background-color: var(--color-cream);
 }
 
+/* No overflow:hidden here on purpose — a sticky action bar inside the review
+   editor needs to escape to the viewport, and overflow:hidden on an ancestor
+   turns it into a scroll container that sticky can't stick past. Header bars
+   that need their corners clipped to match this radius round themselves
+   instead (see rounded-t-[18px] usages). */
 .ticket {
   background: var(--color-paper);
   border: 1.5px solid var(--color-ink);
   border-radius: 18px;
   box-shadow: var(--shadow-ticket);
-  overflow: hidden;
 }
 
 /* Dashed perforation strip with punched-hole notches on each side. The notch

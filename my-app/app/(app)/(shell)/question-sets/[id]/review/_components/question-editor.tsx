@@ -161,7 +161,8 @@ export function QuestionEditor({
   }
 
   return (
-    <div className="flex flex-col gap-[14px]">
+    <>
+      <div className="flex flex-col gap-[14px]">
       {questions.map((q, i) => (
         <div
           key={q.key}
@@ -312,25 +313,29 @@ export function QuestionEditor({
           </div>
         </div>
       ))}
+      </div>
 
-      <button
-        type="button"
-        onClick={addQuestion}
-        className="flex h-[42px] w-fit items-center rounded-[10px] border-[1.5px] border-ink px-[18px] font-sans text-[13px] font-bold text-ink"
-      >
-        + Add question
-      </button>
+      <div className="sticky bottom-0 z-10 -mx-7 mt-[14px] flex flex-col gap-3 border-t-[1.5px] border-ink bg-paper px-7 py-4">
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={addQuestion}
+            className="flex h-[42px] w-fit items-center rounded-[10px] border-[1.5px] border-ink px-[18px] font-sans text-[13px] font-bold text-ink"
+          >
+            + Add question
+          </button>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={isSaving}
-        className="flex h-[46px] w-fit items-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50"
-      >
-        {isSaving ? "Saving…" : "Save and mark ready"}
-      </button>
-    </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex h-[46px] w-fit items-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50"
+          >
+            {isSaving ? "Saving…" : "Save and mark ready"}
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
