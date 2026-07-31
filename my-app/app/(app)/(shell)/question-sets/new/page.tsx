@@ -9,7 +9,7 @@ export default function NewQuestionSetPage() {
   const [title, setTitle] = useState("");
   const [examType, setExamType] = useState("");
   const [questionFiles, setQuestionFiles] = useState<FileList | null>(null);
-  const [answerKeyFile, setAnswerKeyFile] = useState<FileList | null>(null);
+  const [answerKeyFiles, setAnswerKeyFiles] = useState<FileList | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
@@ -57,9 +57,10 @@ export default function NewQuestionSetPage() {
         });
       }
 
-      if (answerKeyFile && answerKeyFile.length > 0) {
-        const file = answerKeyFile[0];
-        setProgress("Uploading answer key…");
+      const answerKeyFileArray = answerKeyFiles ? Array.from(answerKeyFiles) : [];
+      for (let i = 0; i < answerKeyFileArray.length; i++) {
+        const file = answerKeyFileArray[i];
+        setProgress(`Uploading answer key ${i + 1} of ${answerKeyFileArray.length}…`);
         const blob = await upload(file.name, file, {
           access: "public",
           handleUploadUrl: "/api/blob/upload",
@@ -145,20 +146,23 @@ export default function NewQuestionSetPage() {
         </div>
 
         <div>
-          <div className="field-label">Answer key (optional)</div>
+          <div className="field-label">Answer key(s) (optional)</div>
           <label className="relative flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/30 px-[18px] py-[18px] text-center font-sans text-[13px] font-semibold text-muted">
             <input
-              id="answerKeyFile"
+              id="answerKeyFiles"
               type="file"
+              multiple
               accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
-              onChange={(e) => setAnswerKeyFile(e.target.files)}
+              onChange={(e) => setAnswerKeyFiles(e.target.files)}
               className="absolute inset-0 cursor-pointer opacity-0"
             />
-            {answerKeyFile && answerKeyFile.length > 0 ? (
-              <span>{answerKeyFile[0].name}</span>
+            {answerKeyFiles && answerKeyFiles.length > 0 ? (
+              <span>
+                {answerKeyFiles.length} file{answerKeyFiles.length === 1 ? "" : "s"} selected
+              </span>
             ) : (
               <span>
-                Drop file here or <span className="text-amber underline">browse</span>
+                Drop files here or <span className="text-amber underline">browse</span>
               </span>
             )}
           </label>
