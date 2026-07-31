@@ -3,6 +3,7 @@ import { getQuestionSetOwned } from "@/lib/data/question-sets";
 import { AddFilesForm } from "./_components/add-files-form";
 import { ExtractButton } from "./_components/extract-button";
 import { QuestionEditor } from "./_components/question-editor";
+import { SetInfoHeader } from "./_components/set-info-header";
 
 export default async function ReviewPage({
   params,
@@ -16,16 +17,13 @@ export default async function ReviewPage({
 
   return (
     <div className="flex flex-col gap-[22px]">
-      <div>
-        <div className="font-sans text-2xl font-extrabold tracking-tight text-ink">
-          {questionSet.title}
-        </div>
-        <div className="mt-[5px] font-sans text-[13px] font-medium text-muted">
-          {questionSet.sourceUploads.length} file
-          {questionSet.sourceUploads.length === 1 ? "" : "s"} uploaded · status:{" "}
-          {questionSet.status}
-        </div>
-      </div>
+      <SetInfoHeader
+        questionSetId={questionSet.id}
+        title={questionSet.title}
+        examType={questionSet.examType}
+        status={questionSet.status}
+        fileCount={questionSet.sourceUploads.length}
+      />
 
       <div className="flex flex-col gap-2">
         {questionSet.sourceUploads.map((upload) => (
