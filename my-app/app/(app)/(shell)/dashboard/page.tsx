@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { getUser } from "@/lib/dal";
 import { getQuestionSetsForUser } from "@/lib/data/question-sets";
-import { Stamp } from "../_components/stamp";
+import { SetRow } from "./_components/set-row";
 
 export default async function DashboardPage() {
   const user = await getUser();
@@ -34,32 +34,16 @@ export default async function DashboardPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {questionSets.map((set) => (
-            <Link
+            <SetRow
               key={set.id}
-              href={
-                set.status === "READY"
-                  ? `/question-sets/${set.id}/quiz`
-                  : `/question-sets/${set.id}/review`
-              }
-              className="ticket-row flex overflow-hidden rounded-[14px] border-[1.5px] border-ink bg-paper no-underline"
-            >
-              <div className="flex w-[84px] flex-none flex-col items-center justify-center gap-0.5 border-r-2 border-dashed border-cream/40 bg-ink text-cream">
-                <span className="font-mono text-xl font-bold">{set._count.questions}</span>
-                <span className="font-mono text-[9px] font-semibold tracking-[.06em] opacity-70">
-                  ITEMS
-                </span>
-              </div>
-              <div className="flex flex-1 items-center justify-between gap-3 px-5 py-3.5">
-                <div>
-                  <div className="font-sans text-sm font-bold text-ink">{set.title}</div>
-                  <div className="mt-0.5 font-sans text-xs font-medium text-muted">
-                    {set.examType ? `${set.examType} · ` : ""}
-                    {set._count.questions} question{set._count.questions === 1 ? "" : "s"}
-                  </div>
-                </div>
-                <Stamp label={set.status} color={set.status === "READY" ? "green" : "amber"} />
-              </div>
-            </Link>
+              set={{
+                id: set.id,
+                title: set.title,
+                examType: set.examType,
+                status: set.status,
+                questionCount: set._count.questions,
+              }}
+            />
           ))}
         </div>
       )}

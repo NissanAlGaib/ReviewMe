@@ -1,22 +1,42 @@
 import { z } from "zod";
 
+// Keeps each extraction run's file count (and therefore the AI call's duration)
+// small enough to comfortably finish within the extract route's time limit —
+// upload more files in a later batch to add to the same question set instead.
+export const MAX_FILES_PER_UPLOAD = 6;
+
 export const UploadKindSchema = z.enum(["QUESTION_SOURCE", "ANSWER_KEY"]);
+
+const UploadSchema = z.object({
+  blobUrl: z.url(),
+  blobPathname: z.string().min(1),
+  mimeType: z.string().min(1),
+  originalName: z.string().min(1),
+  sizeBytes: z.number().int().positive(),
+  kind: UploadKindSchema,
+});
 
 export const CreateQuestionSetSchema = z.object({
   title: z.string().trim().min(1, "Title is required.").max(200),
   examType: z.string().trim().max(50).optional(),
   uploads: z
-    .array(
-      z.object({
-        blobUrl: z.url(),
-        blobPathname: z.string().min(1),
-        mimeType: z.string().min(1),
-        originalName: z.string().min(1),
-        sizeBytes: z.number().int().positive(),
-        kind: UploadKindSchema,
-      })
-    )
-    .min(1, "Upload at least one question source file."),
+    .array(UploadSchema)
+    .min(1, "Upload at least one question source file.")
+    .max(MAX_FILES_PER_UPLOAD, `Upload at most ${MAX_FILES_PER_UPLOAD} files at a time.`),
+});
+
+export const UpdateQuestionSetSchema = z.object({
+  questionSetId: z.string().min(1),
+  title: z.string().trim().min(1, "Title is required.").max(200),
+  examType: z.string().trim().max(50).optional(),
+});
+
+export const AddUploadsSchema = z.object({
+  questionSetId: z.string().min(1),
+  uploads: z
+    .array(UploadSchema)
+    .min(1, "Select at least one file.")
+    .max(MAX_FILES_PER_UPLOAD, `Upload at most ${MAX_FILES_PER_UPLOAD} files at a time.`),
 });
 
 export const QuestionTypeSchema = z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "IDENTIFICATION"]);

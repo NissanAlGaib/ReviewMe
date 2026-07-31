@@ -28,20 +28,34 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
   const questionSet = await prisma.questionSet.findUnique({
     where: { id },
-    include: { sourceUploads: true },
+    include: {
+      sourceUploads: true,
+      questions: { select: { order: true }, orderBy: { order: "desc" }, take: 1 },
+    },
   });
 
   if (!questionSet || questionSet.userId !== session.user.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (questionSet.sourceUploads.length === 0) {
-    return NextResponse.json({ error: "No uploaded files to extract from" }, { status: 400 });
+  // Extraction is incremental: only files uploaded since the last run get sent
+  // to the AI, and the resulting questions are appended (not a wipe-and-redo)
+  // — this keeps each run's file count (and therefore duration) small, and
+  // lets a set be built up over several smaller upload batches.
+  const pendingUploads = questionSet.sourceUploads.filter((upload) => !upload.processedAt);
+
+  if (pendingUploads.length === 0) {
+    return NextResponse.json(
+      { error: "No new files to extract from. Upload more files first." },
+      { status: 400 }
+    );
   }
+
+  const orderOffset = (questionSet.questions[0]?.order ?? -1) + 1;
 
   try {
     const files: ExtractionFile[] = await Promise.all(
-      questionSet.sourceUploads.map(async (upload) => ({
+      pendingUploads.map(async (upload) => ({
         mimeType: upload.mimeType,
         base64: await fetchAsBase64(upload.blobUrl),
         kind: upload.kind,
@@ -51,11 +65,10 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     const result = await extractQuestions(files);
 
     await prisma.$transaction([
-      prisma.question.deleteMany({ where: { questionSetId: questionSet.id } }),
       prisma.question.createMany({
         data: result.questions.map((q) => ({
           questionSetId: questionSet.id,
-          order: q.order,
+          order: orderOffset + q.order,
           type: q.type,
           questionText: q.questionText,
           topic: q.topic,
@@ -64,6 +77,10 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
           explanation: q.explanation,
           aiConfidence: q.confidence,
         })),
+      }),
+      prisma.sourceUpload.updateMany({
+        where: { id: { in: pendingUploads.map((upload) => upload.id) } },
+        data: { processedAt: new Date() },
       }),
     ]);
 

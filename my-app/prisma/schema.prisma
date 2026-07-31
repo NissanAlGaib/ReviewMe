@@ -105,6 +105,7 @@ model SourceUpload {
   originalName  String
   sizeBytes     Int
   createdAt     DateTime    @default(now())
+  processedAt   DateTime?
 
   @@index([questionSetId])
 }

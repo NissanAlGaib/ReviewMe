@@ -4,6 +4,7 @@ import { useState } from "react";
 import { upload } from "@vercel/blob/client";
 
 import { createQuestionSetFromUploads } from "@/actions/question-sets";
+import { MAX_FILES_PER_UPLOAD } from "@/lib/validation/question-set";
 
 export default function NewQuestionSetPage() {
   const [title, setTitle] = useState("");
@@ -24,6 +25,13 @@ export default function NewQuestionSetPage() {
     }
     if (!questionFiles || questionFiles.length === 0) {
       setError("Please upload at least one question file.");
+      return;
+    }
+    const totalFiles = questionFiles.length + (answerKeyFiles?.length ?? 0);
+    if (totalFiles > MAX_FILES_PER_UPLOAD) {
+      setError(
+        `Upload at most ${MAX_FILES_PER_UPLOAD} files at a time (question source + answer key combined). You can add more files to this set afterward from the review page.`
+      );
       return;
     }
 
@@ -95,7 +103,9 @@ export default function NewQuestionSetPage() {
           New question set
         </div>
         <div className="mt-[5px] font-sans text-[13px] font-medium text-muted">
-          Upload photos or PDFs of exam questions, optionally with a separate answer key.
+          Upload photos or PDFs of exam questions, optionally with a separate answer key. Up to{" "}
+          {MAX_FILES_PER_UPLOAD} files at a time — you can add more to this set later from the
+          review page.
         </div>
       </div>
 
