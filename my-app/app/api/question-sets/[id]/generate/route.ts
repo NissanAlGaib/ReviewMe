@@ -3,17 +3,27 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { extractQuestions, type ExtractionFile } from "@/lib/ai/extract-questions";
+import { generateQuestionsFromLecture, type LectureFile } from "@/lib/ai/generate-questions";
 import { fetchAsBase64 } from "@/lib/ai/fetch-file";
+import { GenerateQuestionsBodySchema } from "@/lib/validation/question-set";
 
 // Runs synchronously inside the request (no queue/background job) — acceptable for a
 // small number of users, but bounded by this duration limit.
 export const maxDuration = 60;
 
-export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => null);
+  const parsedBody = GenerateQuestionsBodySchema.safeParse(body);
+  if (!parsedBody.success) {
+    return NextResponse.json(
+      { error: parsedBody.error.issues[0]?.message ?? "Invalid request." },
+      { status: 400 }
+    );
   }
 
   const { id } = await params;
@@ -30,25 +40,20 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (questionSet.mode !== "EXTRACTED") {
+  if (questionSet.mode !== "GENERATED") {
     return NextResponse.json(
-      { error: "This question set is generated from lecture material, not extracted." },
+      { error: "This question set extracts from existing exam questions, not lecture material." },
       { status: 400 }
     );
   }
 
-  // Extraction is incremental: only files uploaded since the last run get sent
-  // to the AI, and the resulting questions are appended (not a wipe-and-redo)
-  // — this keeps each run's file count (and therefore duration) small, and
-  // lets a set be built up over several smaller upload batches.
-  const pendingUploads = questionSet.sourceUploads.filter(
-    (upload): upload is typeof upload & { kind: "QUESTION_SOURCE" | "ANSWER_KEY" } =>
-      !upload.processedAt && upload.kind !== "LECTURE"
-  );
+  // Generation is incremental, same as extraction: only lecture files uploaded since
+  // the last run are sent to the AI, and the resulting questions are appended.
+  const pendingUploads = questionSet.sourceUploads.filter((upload) => !upload.processedAt);
 
   if (pendingUploads.length === 0) {
     return NextResponse.json(
-      { error: "No new files to extract from. Upload more files first." },
+      { error: "No new lecture files to generate from. Upload more files first." },
       { status: 400 }
     );
   }
@@ -56,15 +61,18 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
   const orderOffset = (questionSet.questions[0]?.order ?? -1) + 1;
 
   try {
-    const files: ExtractionFile[] = await Promise.all(
+    const files: LectureFile[] = await Promise.all(
       pendingUploads.map(async (upload) => ({
         mimeType: upload.mimeType,
         base64: await fetchAsBase64(upload.blobUrl),
-        kind: upload.kind,
+        originalName: upload.originalName,
       }))
     );
 
-    const result = await extractQuestions(files);
+    const result = await generateQuestionsFromLecture(files, {
+      questionCount: parsedBody.data.questionCount,
+      examType: questionSet.examType,
+    });
 
     await prisma.$transaction([
       prisma.question.createMany({
@@ -89,7 +97,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ questionCount: result.questions.length });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Extraction failed" },
+      { error: error instanceof Error ? error.message : "Generation failed" },
       { status: 500 }
     );
   }

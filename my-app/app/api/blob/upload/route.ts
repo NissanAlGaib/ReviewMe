@@ -4,14 +4,19 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 import { auth } from "@/lib/auth";
 
-// Must match what the Gemini API accepts (image/gif, image/webp, image/jpeg, image/png, application/pdf) —
-// there's no format-conversion step, so anything else would fail at extraction time, not at upload time.
+// Images/PDF go to Gemini as vision input directly. The office document types are
+// text-extracted server-side first (see lib/ai/lecture-text.ts) since Gemini doesn't
+// accept them as vision input — only used by the lecture-to-quiz generation flow.
 const ALLOWED_CONTENT_TYPES = [
   "image/jpeg",
   "image/png",
   "image/gif",
   "image/webp",
   "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-powerpoint",
 ];
 const MAX_SIZE_BYTES = 15 * 1024 * 1024;
 

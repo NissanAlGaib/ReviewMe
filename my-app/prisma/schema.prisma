@@ -72,6 +72,11 @@ enum QuestionSetStatus {
   READY
 }
 
+enum QuestionSetMode {
+  EXTRACTED
+  GENERATED
+}
+
 model QuestionSet {
   id        String            @id @default(cuid())
   userId    String
@@ -79,6 +84,7 @@ model QuestionSet {
   title     String
   examType  String?
   status    QuestionSetStatus @default(DRAFT)
+  mode      QuestionSetMode   @default(EXTRACTED)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
@@ -92,6 +98,7 @@ model QuestionSet {
 enum UploadKind {
   QUESTION_SOURCE
   ANSWER_KEY
+  LECTURE
 }
 
 model SourceUpload {

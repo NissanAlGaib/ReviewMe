@@ -2,8 +2,15 @@ import { getUser } from "@/lib/dal";
 import { getQuestionSetOwned } from "@/lib/data/question-sets";
 import { AddFilesForm } from "./_components/add-files-form";
 import { ExtractButton } from "./_components/extract-button";
+import { GenerateButton } from "./_components/generate-button";
 import { QuestionEditor } from "./_components/question-editor";
 import { SetInfoHeader } from "./_components/set-info-header";
+
+const UPLOAD_KIND_LABELS: Record<string, string> = {
+  QUESTION_SOURCE: "QUESTION SOURCE",
+  ANSWER_KEY: "ANSWER KEY",
+  LECTURE: "LECTURE MATERIAL",
+};
 
 export default async function ReviewPage({
   params,
@@ -38,22 +45,28 @@ export default async function ReviewPage({
                   upload.processedAt ? "text-[#166534]" : "text-amber"
                 }`}
               >
-                {upload.processedAt ? "EXTRACTED" : "PENDING"}
+                {upload.processedAt ? "PROCESSED" : "PENDING"}
               </span>
               <span className="font-mono text-[10px] font-bold tracking-[.06em] text-muted">
-                {upload.kind === "QUESTION_SOURCE" ? "QUESTION SOURCE" : "ANSWER KEY"}
+                {UPLOAD_KIND_LABELS[upload.kind] ?? upload.kind}
               </span>
             </div>
           </div>
         ))}
-        <AddFilesForm questionSetId={questionSet.id} />
+        <AddFilesForm questionSetId={questionSet.id} mode={questionSet.mode} />
       </div>
 
-      <ExtractButton questionSetId={questionSet.id} hasPending={hasPending} />
+      {questionSet.mode === "GENERATED" ? (
+        <GenerateButton questionSetId={questionSet.id} hasPending={hasPending} />
+      ) : (
+        <ExtractButton questionSetId={questionSet.id} hasPending={hasPending} />
+      )}
 
       {questionSet.questions.length > 0 && (
         <div className="flex flex-col gap-[14px]">
-          <div className="font-sans text-sm font-bold text-ink">Review extracted questions</div>
+          <div className="font-sans text-sm font-bold text-ink">
+            {questionSet.mode === "GENERATED" ? "Review generated questions" : "Review extracted questions"}
+          </div>
           <QuestionEditor
             key={questionSet.questions.length}
             questionSetId={questionSet.id}

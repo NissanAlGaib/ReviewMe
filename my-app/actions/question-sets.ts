@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { verifySession } from "@/lib/dal";
 import {
   AddUploadsSchema,
+  CreateQuestionSetFromLectureSchema,
   CreateQuestionSetSchema,
   SaveReviewedQuestionsSchema,
   UpdateQuestionSetSchema,
@@ -51,6 +52,50 @@ export async function createQuestionSetFromUploads(input: CreateQuestionSetInput
   redirect(`/question-sets/${questionSet.id}/review`);
 }
 
+export type CreateQuestionSetFromLectureInput = {
+  title: string;
+  examType?: string;
+  questionCount: number;
+  uploads: {
+    blobUrl: string;
+    blobPathname: string;
+    mimeType: string;
+    originalName: string;
+    sizeBytes: number;
+  }[];
+};
+
+/** Creates a set from lecture material rather than existing exam questions — the AI
+ * authors brand-new questions from the content instead of extracting pre-written ones.
+ * The requested question count isn't persisted; it's only used by the first generation
+ * run the user kicks off from the review page (see the /generate route). */
+export async function createQuestionSetFromLecture(input: CreateQuestionSetFromLectureInput) {
+  const session = await verifySession();
+
+  const validated = CreateQuestionSetFromLectureSchema.parse(input);
+
+  const questionSet = await prisma.questionSet.create({
+    data: {
+      userId: session.user.id,
+      title: validated.title,
+      examType: validated.examType || null,
+      mode: "GENERATED",
+      sourceUploads: {
+        create: validated.uploads.map((upload) => ({
+          kind: "LECTURE" as const,
+          blobUrl: upload.blobUrl,
+          blobPathname: upload.blobPathname,
+          mimeType: upload.mimeType,
+          originalName: upload.originalName,
+          sizeBytes: upload.sizeBytes,
+        })),
+      },
+    },
+  });
+
+  redirect(`/question-sets/${questionSet.id}/review`);
+}
+
 export type AddUploadsInput = {
   questionSetId: string;
   uploads: {
@@ -59,7 +104,7 @@ export type AddUploadsInput = {
     mimeType: string;
     originalName: string;
     sizeBytes: number;
-    kind: "QUESTION_SOURCE" | "ANSWER_KEY";
+    kind: "QUESTION_SOURCE" | "ANSWER_KEY" | "LECTURE";
   }[];
 };
 

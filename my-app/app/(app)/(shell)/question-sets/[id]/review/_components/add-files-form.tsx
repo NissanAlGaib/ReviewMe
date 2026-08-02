@@ -7,12 +7,31 @@ import { upload } from "@vercel/blob/client";
 import { addUploadsToQuestionSet } from "@/actions/question-sets";
 import { MAX_FILES_PER_UPLOAD } from "@/lib/validation/question-set";
 
-type Kind = "QUESTION_SOURCE" | "ANSWER_KEY";
+type Kind = "QUESTION_SOURCE" | "ANSWER_KEY" | "LECTURE";
 
-export function AddFilesForm({ questionSetId }: { questionSetId: string }) {
+const EXAM_ACCEPT = "image/jpeg,image/png,image/gif,image/webp,application/pdf";
+const LECTURE_ACCEPT = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-powerpoint",
+].join(",");
+
+export function AddFilesForm({
+  questionSetId,
+  mode,
+}: {
+  questionSetId: string;
+  mode: "EXTRACTED" | "GENERATED";
+}) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [kind, setKind] = useState<Kind>("QUESTION_SOURCE");
+  const [kind, setKind] = useState<Kind>(mode === "GENERATED" ? "LECTURE" : "QUESTION_SOURCE");
   const [files, setFiles] = useState<FileList | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,32 +109,34 @@ export function AddFilesForm({ questionSetId }: { questionSetId: string }) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-[14px] border-[1.5px] border-dashed border-ink/40 p-4"
     >
-      <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-1.5 font-sans text-[13px] font-semibold text-ink">
-          <input
-            type="radio"
-            name="kind"
-            checked={kind === "QUESTION_SOURCE"}
-            onChange={() => setKind("QUESTION_SOURCE")}
-          />
-          Question source
-        </label>
-        <label className="flex items-center gap-1.5 font-sans text-[13px] font-semibold text-ink">
-          <input
-            type="radio"
-            name="kind"
-            checked={kind === "ANSWER_KEY"}
-            onChange={() => setKind("ANSWER_KEY")}
-          />
-          Answer key
-        </label>
-      </div>
+      {mode === "EXTRACTED" && (
+        <div className="flex flex-wrap items-center gap-4">
+          <label className="flex items-center gap-1.5 font-sans text-[13px] font-semibold text-ink">
+            <input
+              type="radio"
+              name="kind"
+              checked={kind === "QUESTION_SOURCE"}
+              onChange={() => setKind("QUESTION_SOURCE")}
+            />
+            Question source
+          </label>
+          <label className="flex items-center gap-1.5 font-sans text-[13px] font-semibold text-ink">
+            <input
+              type="radio"
+              name="kind"
+              checked={kind === "ANSWER_KEY"}
+              onChange={() => setKind("ANSWER_KEY")}
+            />
+            Answer key
+          </label>
+        </div>
+      )}
 
       <label className="relative flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/30 px-[18px] py-[14px] text-center font-sans text-[13px] font-semibold text-muted">
         <input
           type="file"
           multiple
-          accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
+          accept={mode === "GENERATED" ? LECTURE_ACCEPT : EXAM_ACCEPT}
           onChange={(e) => setFiles(e.target.files)}
           className="absolute inset-0 cursor-pointer opacity-0"
         />
