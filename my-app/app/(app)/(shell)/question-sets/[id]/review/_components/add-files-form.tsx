@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 
 import { addUploadsToQuestionSet } from "@/actions/question-sets";
 import { MAX_FILES_PER_UPLOAD } from "@/lib/validation/question-set";
+import { FilePicker } from "../../../../_components/file-picker";
 
 type Kind = "QUESTION_SOURCE" | "ANSWER_KEY" | "LECTURE";
 
@@ -32,7 +33,7 @@ export function AddFilesForm({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [kind, setKind] = useState<Kind>(mode === "GENERATED" ? "LECTURE" : "QUESTION_SOURCE");
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
@@ -41,12 +42,11 @@ export function AddFilesForm({
     e.preventDefault();
     setError(null);
 
-    const fileArray = files ? Array.from(files) : [];
-    if (fileArray.length === 0) {
+    if (files.length === 0) {
       setError("Select at least one file.");
       return;
     }
-    if (fileArray.length > MAX_FILES_PER_UPLOAD) {
+    if (files.length > MAX_FILES_PER_UPLOAD) {
       setError(`Upload at most ${MAX_FILES_PER_UPLOAD} files at a time.`);
       return;
     }
@@ -63,9 +63,9 @@ export function AddFilesForm({
         kind: Kind;
       }[] = [];
 
-      for (let i = 0; i < fileArray.length; i++) {
-        const file = fileArray[i];
-        setProgress(`Uploading file ${i + 1} of ${fileArray.length}…`);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setProgress(`Uploading file ${i + 1} of ${files.length}…`);
         const blob = await upload(file.name, file, {
           access: "public",
           handleUploadUrl: "/api/blob/upload",
@@ -81,7 +81,7 @@ export function AddFilesForm({
       }
 
       await addUploadsToQuestionSet({ questionSetId, uploads });
-      setFiles(null);
+      setFiles([]);
       setIsOpen(false);
       router.refresh();
     } catch (err) {
@@ -132,25 +132,13 @@ export function AddFilesForm({
         </div>
       )}
 
-      <label className="relative flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/30 px-[18px] py-[14px] text-center font-sans text-[13px] font-semibold text-muted">
-        <input
-          type="file"
-          multiple
-          accept={mode === "GENERATED" ? LECTURE_ACCEPT : EXAM_ACCEPT}
-          onChange={(e) => setFiles(e.target.files)}
-          className="absolute inset-0 cursor-pointer opacity-0"
-        />
-        {files && files.length > 0 ? (
-          <span>
-            {files.length} file{files.length === 1 ? "" : "s"} selected
-          </span>
-        ) : (
-          <span>
-            Drop files here or <span className="text-amber underline">browse</span> (up to{" "}
-            {MAX_FILES_PER_UPLOAD})
-          </span>
-        )}
-      </label>
+      <FilePicker
+        files={files}
+        setFiles={setFiles}
+        accept={mode === "GENERATED" ? LECTURE_ACCEPT : EXAM_ACCEPT}
+        allowCamera
+        disabled={isSubmitting}
+      />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {progress && <p className="font-sans text-[13px] font-medium text-muted">{progress}</p>}
@@ -168,7 +156,7 @@ export function AddFilesForm({
           onClick={() => {
             setIsOpen(false);
             setError(null);
-            setFiles(null);
+            setFiles([]);
           }}
           disabled={isSubmitting}
           className="font-sans text-[13px] font-semibold text-muted hover:underline"

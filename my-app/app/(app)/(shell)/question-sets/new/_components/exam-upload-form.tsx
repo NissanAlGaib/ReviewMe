@@ -5,12 +5,15 @@ import { upload } from "@vercel/blob/client";
 
 import { createQuestionSetFromUploads } from "@/actions/question-sets";
 import { MAX_FILES_PER_UPLOAD } from "@/lib/validation/question-set";
+import { FilePicker } from "../../../_components/file-picker";
+
+const EXAM_ACCEPT = "image/jpeg,image/png,image/gif,image/webp,application/pdf";
 
 export function ExamUploadForm() {
   const [title, setTitle] = useState("");
   const [examType, setExamType] = useState("");
-  const [questionFiles, setQuestionFiles] = useState<FileList | null>(null);
-  const [answerKeyFiles, setAnswerKeyFiles] = useState<FileList | null>(null);
+  const [questionFiles, setQuestionFiles] = useState<File[]>([]);
+  const [answerKeyFiles, setAnswerKeyFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
@@ -23,11 +26,11 @@ export function ExamUploadForm() {
       setError("Please enter a title.");
       return;
     }
-    if (!questionFiles || questionFiles.length === 0) {
+    if (questionFiles.length === 0) {
       setError("Please upload at least one question file.");
       return;
     }
-    const totalFiles = questionFiles.length + (answerKeyFiles?.length ?? 0);
+    const totalFiles = questionFiles.length + answerKeyFiles.length;
     if (totalFiles > MAX_FILES_PER_UPLOAD) {
       setError(
         `Upload at most ${MAX_FILES_PER_UPLOAD} files at a time (question source + answer key combined). You can add more files to this set afterward from the review page.`
@@ -47,10 +50,9 @@ export function ExamUploadForm() {
         kind: "QUESTION_SOURCE" | "ANSWER_KEY";
       }[] = [];
 
-      const questionFileArray = Array.from(questionFiles);
-      for (let i = 0; i < questionFileArray.length; i++) {
-        const file = questionFileArray[i];
-        setProgress(`Uploading question file ${i + 1} of ${questionFileArray.length}…`);
+      for (let i = 0; i < questionFiles.length; i++) {
+        const file = questionFiles[i];
+        setProgress(`Uploading question file ${i + 1} of ${questionFiles.length}…`);
         const blob = await upload(file.name, file, {
           access: "public",
           handleUploadUrl: "/api/blob/upload",
@@ -65,10 +67,9 @@ export function ExamUploadForm() {
         });
       }
 
-      const answerKeyFileArray = answerKeyFiles ? Array.from(answerKeyFiles) : [];
-      for (let i = 0; i < answerKeyFileArray.length; i++) {
-        const file = answerKeyFileArray[i];
-        setProgress(`Uploading answer key ${i + 1} of ${answerKeyFileArray.length}…`);
+      for (let i = 0; i < answerKeyFiles.length; i++) {
+        const file = answerKeyFiles[i];
+        setProgress(`Uploading answer key ${i + 1} of ${answerKeyFiles.length}…`);
         const blob = await upload(file.name, file, {
           access: "public",
           handleUploadUrl: "/api/blob/upload",
@@ -129,48 +130,24 @@ export function ExamUploadForm() {
 
         <div>
           <div className="field-label">Question images / PDFs</div>
-          <label className="relative flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/30 px-[18px] py-[18px] text-center font-sans text-[13px] font-semibold text-muted">
-            <input
-              id="questionFiles"
-              type="file"
-              multiple
-              accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
-              onChange={(e) => setQuestionFiles(e.target.files)}
-              className="absolute inset-0 cursor-pointer opacity-0"
-            />
-            {questionFiles && questionFiles.length > 0 ? (
-              <span>
-                {questionFiles.length} file{questionFiles.length === 1 ? "" : "s"} selected
-              </span>
-            ) : (
-              <span>
-                Drop files here or <span className="text-amber underline">browse</span>
-              </span>
-            )}
-          </label>
+          <FilePicker
+            files={questionFiles}
+            setFiles={setQuestionFiles}
+            accept={EXAM_ACCEPT}
+            allowCamera
+            disabled={isSubmitting}
+          />
         </div>
 
         <div>
           <div className="field-label">Answer key(s) (optional)</div>
-          <label className="relative flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/30 px-[18px] py-[18px] text-center font-sans text-[13px] font-semibold text-muted">
-            <input
-              id="answerKeyFiles"
-              type="file"
-              multiple
-              accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
-              onChange={(e) => setAnswerKeyFiles(e.target.files)}
-              className="absolute inset-0 cursor-pointer opacity-0"
-            />
-            {answerKeyFiles && answerKeyFiles.length > 0 ? (
-              <span>
-                {answerKeyFiles.length} file{answerKeyFiles.length === 1 ? "" : "s"} selected
-              </span>
-            ) : (
-              <span>
-                Drop files here or <span className="text-amber underline">browse</span>
-              </span>
-            )}
-          </label>
+          <FilePicker
+            files={answerKeyFiles}
+            setFiles={setAnswerKeyFiles}
+            accept={EXAM_ACCEPT}
+            allowCamera
+            disabled={isSubmitting}
+          />
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}

@@ -55,7 +55,6 @@ export async function createQuestionSetFromUploads(input: CreateQuestionSetInput
 export type CreateQuestionSetFromLectureInput = {
   title: string;
   examType?: string;
-  questionCount: number;
   uploads: {
     blobUrl: string;
     blobPathname: string;
@@ -67,9 +66,12 @@ export type CreateQuestionSetFromLectureInput = {
 
 /** Creates a set from lecture material rather than existing exam questions — the AI
  * authors brand-new questions from the content instead of extracting pre-written ones.
- * The requested question count isn't persisted; it's only used by the first generation
- * run the user kicks off from the review page (see the /generate route). */
-export async function createQuestionSetFromLecture(input: CreateQuestionSetFromLectureInput) {
+ * Unlike createQuestionSetFromUploads, this doesn't redirect: the caller still needs to
+ * kick off the actual generation run (question count/types/difficulty, chosen on the
+ * "New question set" configure step) via the /generate route before navigating. */
+export async function createQuestionSetFromLecture(
+  input: CreateQuestionSetFromLectureInput
+): Promise<{ questionSetId: string }> {
   const session = await verifySession();
 
   const validated = CreateQuestionSetFromLectureSchema.parse(input);
@@ -93,7 +95,7 @@ export async function createQuestionSetFromLecture(input: CreateQuestionSetFromL
     },
   });
 
-  redirect(`/question-sets/${questionSet.id}/review`);
+  return { questionSetId: questionSet.id };
 }
 
 export type AddUploadsInput = {

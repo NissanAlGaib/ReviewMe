@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { generateQuestionsFromLecture, type LectureFile } from "@/lib/ai/generate-questions";
 import { fetchAsBase64 } from "@/lib/ai/fetch-file";
+import { dedupeQuestions } from "@/lib/ai/dedupe-questions";
 import { GenerateQuestionsBodySchema } from "@/lib/validation/question-set";
 
 // Runs synchronously inside the request (no queue/background job) — acceptable for a
@@ -32,7 +33,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     where: { id },
     include: {
       sourceUploads: true,
-      questions: { select: { order: true }, orderBy: { order: "desc" }, take: 1 },
+      questions: { select: { order: true, questionText: true }, orderBy: { order: "desc" } },
     },
   });
 
@@ -72,13 +73,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const result = await generateQuestionsFromLecture(files, {
       questionCount: parsedBody.data.questionCount,
       examType: questionSet.examType,
+      questionTypes: parsedBody.data.questionTypes,
+      difficulty: parsedBody.data.difficulty,
     });
+    const newQuestions = dedupeQuestions(
+      result.questions,
+      questionSet.questions.map((q) => q.questionText)
+    );
 
     await prisma.$transaction([
       prisma.question.createMany({
-        data: result.questions.map((q) => ({
+        data: newQuestions.map((q, i) => ({
           questionSetId: questionSet.id,
-          order: orderOffset + q.order,
+          order: orderOffset + i,
           type: q.type,
           questionText: q.questionText,
           topic: q.topic,
@@ -94,7 +101,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }),
     ]);
 
-    return NextResponse.json({ questionCount: result.questions.length });
+    return NextResponse.json({ questionCount: newQuestions.length });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Generation failed" },

@@ -27,9 +27,22 @@ export const CreateQuestionSetSchema = z.object({
     .max(MAX_FILES_PER_UPLOAD, `Upload at most ${MAX_FILES_PER_UPLOAD} files at a time.`),
 });
 
+export const QuestionTypeSchema = z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "IDENTIFICATION"]);
+
+export const QUESTION_TYPE_LABELS: Record<z.infer<typeof QuestionTypeSchema>, string> = {
+  MULTIPLE_CHOICE: "Multiple choice",
+  TRUE_FALSE: "True/False",
+  IDENTIFICATION: "Identification",
+};
+
+export const DifficultySchema = z.enum(["Easy", "Medium", "Hard"]);
+export const DIFFICULTIES = DifficultySchema.options;
+export const DEFAULT_DIFFICULTY: z.infer<typeof DifficultySchema> = "Medium";
+
 export const MIN_GENERATED_QUESTIONS = 5;
-export const MAX_GENERATED_QUESTIONS = 50;
-export const DEFAULT_GENERATED_QUESTIONS = 15;
+export const MAX_GENERATED_QUESTIONS = 60;
+export const QUESTION_COUNT_STEP = 5;
+export const DEFAULT_GENERATED_QUESTIONS = 20;
 
 export const QuestionCountSchema = z
   .number()
@@ -37,10 +50,16 @@ export const QuestionCountSchema = z
   .min(MIN_GENERATED_QUESTIONS, `Generate at least ${MIN_GENERATED_QUESTIONS} questions.`)
   .max(MAX_GENERATED_QUESTIONS, `Generate at most ${MAX_GENERATED_QUESTIONS} questions at a time.`);
 
+export const DetectTopicsSchema = z.object({
+  uploads: z
+    .array(LectureUploadSchema)
+    .min(1, "Upload at least one lecture file.")
+    .max(MAX_FILES_PER_UPLOAD, `Upload at most ${MAX_FILES_PER_UPLOAD} files at a time.`),
+});
+
 export const CreateQuestionSetFromLectureSchema = z.object({
   title: z.string().trim().min(1, "Title is required.").max(200),
   examType: z.string().trim().max(50).optional(),
-  questionCount: QuestionCountSchema,
   uploads: z
     .array(LectureUploadSchema)
     .min(1, "Upload at least one lecture file.")
@@ -49,6 +68,8 @@ export const CreateQuestionSetFromLectureSchema = z.object({
 
 export const GenerateQuestionsBodySchema = z.object({
   questionCount: QuestionCountSchema,
+  questionTypes: z.array(QuestionTypeSchema).min(1, "Select at least one question type.").optional(),
+  difficulty: DifficultySchema.optional(),
 });
 
 export const UpdateQuestionSetSchema = z.object({
@@ -64,8 +85,6 @@ export const AddUploadsSchema = z.object({
     .min(1, "Select at least one file.")
     .max(MAX_FILES_PER_UPLOAD, `Upload at most ${MAX_FILES_PER_UPLOAD} files at a time.`),
 });
-
-export const QuestionTypeSchema = z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "IDENTIFICATION"]);
 
 export const ReviewedQuestionSchema = z.object({
   order: z.number().int().nonnegative(),

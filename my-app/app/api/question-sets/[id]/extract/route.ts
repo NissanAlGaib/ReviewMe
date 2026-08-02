@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { extractQuestions, type ExtractionFile } from "@/lib/ai/extract-questions";
 import { fetchAsBase64 } from "@/lib/ai/fetch-file";
+import { dedupeQuestions } from "@/lib/ai/dedupe-questions";
 
 // Runs synchronously inside the request (no queue/background job) — acceptable for a
 // small number of users, but bounded by this duration limit.
@@ -22,7 +23,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     where: { id },
     include: {
       sourceUploads: true,
-      questions: { select: { order: true }, orderBy: { order: "desc" }, take: 1 },
+      questions: { select: { order: true, questionText: true }, orderBy: { order: "desc" } },
     },
   });
 
@@ -65,12 +66,16 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     );
 
     const result = await extractQuestions(files);
+    const newQuestions = dedupeQuestions(
+      result.questions,
+      questionSet.questions.map((q) => q.questionText)
+    );
 
     await prisma.$transaction([
       prisma.question.createMany({
-        data: result.questions.map((q) => ({
+        data: newQuestions.map((q, i) => ({
           questionSetId: questionSet.id,
-          order: orderOffset + q.order,
+          order: orderOffset + i,
           type: q.type,
           questionText: q.questionText,
           topic: q.topic,
@@ -86,7 +91,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       }),
     ]);
 
-    return NextResponse.json({ questionCount: result.questions.length });
+    return NextResponse.json({ questionCount: newQuestions.length });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Extraction failed" },
