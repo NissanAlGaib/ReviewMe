@@ -2,7 +2,12 @@ import "server-only";
 import { Type } from "@google/genai";
 import { z } from "zod";
 
-import { ai, MODEL, runQuestionGeneration, type GenerationPart } from "@/lib/ai/gemini-client";
+import {
+  ai,
+  callWithResilience,
+  runQuestionGeneration,
+  type GenerationPart,
+} from "@/lib/ai/gemini-client";
 import { extractOfficeDocumentText, OFFICE_DOCUMENT_MIME_TYPES } from "@/lib/ai/lecture-text";
 import { QUESTION_TYPE_LABELS, type QuestionTypeSchema, type DifficultySchema } from "@/lib/validation/question-set";
 import type { ExtractionResult } from "@/lib/ai/schema";
@@ -107,15 +112,17 @@ export async function detectLectureTopics(files: LectureFile[]): Promise<string[
     text: "Identify the 4 to 8 most important topics/subjects covered in this lecture material, for use as review categories in a study app. Keep each topic short (2-4 words). List them ordered by how central they are to the material.",
   });
 
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: [{ role: "user", parts }],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: TOPICS_RESPONSE_SCHEMA,
-      maxOutputTokens: 2048,
-    },
-  });
+  const response = await callWithResilience((model) =>
+    ai.models.generateContent({
+      model,
+      contents: [{ role: "user", parts }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: TOPICS_RESPONSE_SCHEMA,
+        maxOutputTokens: 2048,
+      },
+    })
+  );
 
   if (!response.text) {
     throw new Error("Gemini did not return a parseable result.");

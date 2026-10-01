@@ -1,5 +1,5 @@
 import "server-only";
-import { GoogleGenAI, Type, type Schema } from "@google/genai";
+import { ApiError, GoogleGenAI, Type, type Schema } from "@google/genai";
 
 import { ExtractionResultSchema, type ExtractionResult } from "@/lib/ai/schema";
 
@@ -11,6 +11,62 @@ export const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
  * to new users". Swap to "gemini-flash-latest" or "gemini-pro-latest" for a specific set
  * if quality on messy scans/handwriting turns out to be poor (lower free-tier quota). */
 export const MODEL = "gemini-flash-lite-latest";
+
+/** Used as a last-resort retry target when MODEL is overloaded — a separate rolling
+ * alias (non-lite Flash), so it draws from a different capacity pool and isn't
+ * necessarily hit by the same "high demand" spike as MODEL. */
+const FALLBACK_MODEL = "gemini-flash-latest";
+
+const RETRYABLE_STATUS_CODES = new Set([429, 503]);
+
+function isRetryable(error: unknown): boolean {
+  return error instanceof ApiError && RETRYABLE_STATUS_CODES.has(error.status);
+}
+
+/** The genai SDK's ApiError.message is the *entire* raw HTTP error body
+ * JSON-stringified (e.g. `{"error":{"code":503,"message":"...","status":
+ * "UNAVAILABLE"}}`) — fine for logs, not for showing a user. Pull out just
+ * the human-readable inner message where possible. */
+function cleanErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    try {
+      const inner = JSON.parse(error.message)?.error?.message;
+      if (typeof inner === "string" && inner.trim()) return inner;
+    } catch {
+      // Not JSON after all — fall through to the raw message below.
+    }
+  }
+  return error instanceof Error ? error.message : "Something went wrong talking to the AI.";
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Retries a Gemini call with backoff on transient errors (rate limits, "model
+ * overloaded"), then falls back to a different model for one last attempt before
+ * giving up with a clean message — instead of a raw JSON error blob reaching the UI.
+ * Non-retryable errors (bad input, auth, etc.) fail fast on the first attempt. */
+export async function callWithResilience<T>(attempt: (model: string) => Promise<T>): Promise<T> {
+  const plan: { model: string; delayMs: number }[] = [
+    { model: MODEL, delayMs: 0 },
+    { model: MODEL, delayMs: 1500 },
+    { model: FALLBACK_MODEL, delayMs: 1500 },
+  ];
+
+  let lastError: unknown;
+  for (const { model, delayMs } of plan) {
+    if (delayMs) await sleep(delayMs);
+    try {
+      return await attempt(model);
+    } catch (error) {
+      lastError = error;
+      if (!isRetryable(error)) throw new Error(cleanErrorMessage(error));
+    }
+  }
+
+  throw new Error(cleanErrorMessage(lastError));
+}
 
 export type GenerationPart = { text: string } | { inlineData: { mimeType: string; data: string } };
 
@@ -64,15 +120,17 @@ export const QUESTION_RESPONSE_SCHEMA: Schema = {
 };
 
 export async function runQuestionGeneration(parts: GenerationPart[]): Promise<ExtractionResult> {
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: [{ role: "user", parts }],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: QUESTION_RESPONSE_SCHEMA,
-      maxOutputTokens: 65536,
-    },
-  });
+  const response = await callWithResilience((model) =>
+    ai.models.generateContent({
+      model,
+      contents: [{ role: "user", parts }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: QUESTION_RESPONSE_SCHEMA,
+        maxOutputTokens: 65536,
+      },
+    })
+  );
 
   if (!response.text) {
     throw new Error("Gemini did not return a parseable result.");
