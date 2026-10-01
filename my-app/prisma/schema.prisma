@@ -85,6 +85,8 @@ model QuestionSet {
   examType  String?
   status    QuestionSetStatus @default(DRAFT)
   mode      QuestionSetMode   @default(EXTRACTED)
+  shareSlug String?           @unique
+  isShared  Boolean           @default(false)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 

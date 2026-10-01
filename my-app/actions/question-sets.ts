@@ -7,9 +7,12 @@ import { prisma } from "@/lib/db";
 import { verifySession } from "@/lib/dal";
 import {
   AddUploadsSchema,
+  CopySharedQuestionSetSchema,
   CreateQuestionSetFromLectureSchema,
   CreateQuestionSetSchema,
+  RegenerateShareLinkSchema,
   SaveReviewedQuestionsSchema,
+  ToggleSharingSchema,
   UpdateQuestionSetSchema,
 } from "@/lib/validation/question-set";
 
@@ -237,4 +240,103 @@ export async function saveReviewedQuestions(input: SaveReviewedQuestionsInput) {
   ]);
 
   redirect("/dashboard");
+}
+
+export type ToggleSharingInput = {
+  questionSetId: string;
+  enabled: boolean;
+};
+
+/** Turning sharing off deliberately keeps the existing shareSlug (rather than
+ * clearing it) so re-enabling restores the same link — use
+ * regenerateShareLink to actually invalidate a previously-shared URL. */
+export async function toggleSharing(input: ToggleSharingInput) {
+  const session = await verifySession();
+
+  const validated = ToggleSharingSchema.parse(input);
+
+  const questionSet = await prisma.questionSet.findUnique({
+    where: { id: validated.questionSetId },
+  });
+
+  if (!questionSet || questionSet.userId !== session.user.id) {
+    throw new Error("Question set not found.");
+  }
+
+  if (validated.enabled && questionSet.status !== "READY") {
+    throw new Error("Finish reviewing this set before sharing it.");
+  }
+
+  await prisma.questionSet.update({
+    where: { id: questionSet.id },
+    data: {
+      isShared: validated.enabled,
+      shareSlug: questionSet.shareSlug ?? (validated.enabled ? crypto.randomUUID() : null),
+    },
+  });
+}
+
+export async function regenerateShareLink(questionSetId: string) {
+  const session = await verifySession();
+
+  const validated = RegenerateShareLinkSchema.parse({ questionSetId });
+
+  const questionSet = await prisma.questionSet.findUnique({
+    where: { id: validated.questionSetId },
+  });
+
+  if (!questionSet || questionSet.userId !== session.user.id) {
+    throw new Error("Question set not found.");
+  }
+
+  const shareSlug = crypto.randomUUID();
+  await prisma.questionSet.update({
+    where: { id: questionSet.id },
+    data: { shareSlug, isShared: true },
+  });
+
+  return { shareSlug };
+}
+
+/** Creates an independent, fully-editable copy of a shared question set
+ * owned by the caller. Source uploads aren't carried over — those blobs
+ * belong to the original owner — so the copy starts with just the
+ * finalized questions, already READY. */
+export async function copySharedQuestionSet(shareSlug: string) {
+  const session = await verifySession();
+
+  const validated = CopySharedQuestionSetSchema.parse({ shareSlug });
+
+  const source = await prisma.questionSet.findUnique({
+    where: { shareSlug: validated.shareSlug, isShared: true },
+    include: { questions: { orderBy: { order: "asc" } } },
+  });
+
+  if (!source) {
+    throw new Error("This shared question set is no longer available.");
+  }
+
+  const copy = await prisma.questionSet.create({
+    data: {
+      userId: session.user.id,
+      title: `Copy of ${source.title}`,
+      examType: source.examType,
+      mode: source.mode,
+      status: "READY",
+      questions: {
+        create: source.questions.map((q) => ({
+          order: q.order,
+          type: q.type,
+          questionText: q.questionText,
+          topic: q.topic,
+          choices: q.choices ?? undefined,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation,
+          aiConfidence: null,
+        })),
+      },
+    },
+  });
+
+  redirect(`/question-sets/${copy.id}/review`);
 }

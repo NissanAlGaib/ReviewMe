@@ -107,3 +107,16 @@ export const SaveReviewedQuestionsSchema = z.object({
   questionSetId: z.string().min(1),
   questions: z.array(ReviewedQuestionSchema).min(1, "Add at least one question."),
 });
+
+export const ToggleSharingSchema = z.object({
+  questionSetId: z.string().min(1),
+  enabled: z.boolean(),
+});
+
+export const RegenerateShareLinkSchema = z.object({
+  questionSetId: z.string().min(1),
+});
+
+export const CopySharedQuestionSetSchema = z.object({
+  shareSlug: z.string().min(1),
+});

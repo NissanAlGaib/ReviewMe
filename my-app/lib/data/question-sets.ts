@@ -45,3 +45,34 @@ export async function getQuestionsForQuiz(id: string, userId: string) {
     })),
   };
 }
+
+/** Public counterpart of getQuestionsForQuiz — looked up by share slug with
+ * no owner check, and only returns data while the set is actively shared.
+ * Same correctAnswer/explanation-stripping DTO shape: a question's answer
+ * must never reach the client until it's actually been checked. Returns
+ * null (callers should 404) when the slug doesn't match a currently-shared
+ * set, including when sharing has been turned off but the slug still
+ * exists on the row. */
+export async function getSharedQuestionSet(shareSlug: string) {
+  const questionSet = await prisma.questionSet.findUnique({
+    where: { shareSlug, isShared: true },
+    include: { questions: { orderBy: { order: "asc" } } },
+  });
+
+  if (!questionSet) return null;
+
+  return {
+    id: questionSet.id,
+    userId: questionSet.userId,
+    title: questionSet.title,
+    examType: questionSet.examType,
+    questions: questionSet.questions.map((q) => ({
+      id: q.id,
+      order: q.order,
+      type: q.type,
+      questionText: q.questionText,
+      topic: q.topic,
+      choices: q.choices,
+    })),
+  };
+}

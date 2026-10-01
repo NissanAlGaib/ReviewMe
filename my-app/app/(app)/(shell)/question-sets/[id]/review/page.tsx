@@ -5,6 +5,7 @@ import { ExtractButton } from "./_components/extract-button";
 import { GenerateButton } from "./_components/generate-button";
 import { QuestionEditor } from "./_components/question-editor";
 import { SetInfoHeader } from "./_components/set-info-header";
+import { SharePanel } from "./_components/share-panel";
 
 const UPLOAD_KIND_LABELS: Record<string, string> = {
   QUESTION_SOURCE: "QUESTION SOURCE",
@@ -30,6 +31,13 @@ export default async function ReviewPage({
         examType={questionSet.examType}
         status={questionSet.status}
         fileCount={questionSet.sourceUploads.length}
+      />
+
+      <SharePanel
+        questionSetId={questionSet.id}
+        status={questionSet.status}
+        isShared={questionSet.isShared}
+        shareSlug={questionSet.shareSlug}
       />
 
       <div className="flex flex-col gap-2">

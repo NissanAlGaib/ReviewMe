@@ -15,3 +15,19 @@ export const CheckAnswerSchema = z.object({
   questionId: z.string().min(1),
   userAnswer: z.string().nullable(),
 });
+
+export const CheckSharedAnswerSchema = z.object({
+  shareSlug: z.string().min(1),
+  questionId: z.string().min(1),
+  userAnswer: z.string().nullable(),
+});
+
+export const SharedQuizSubmissionSchema = z.object({
+  shareSlug: z.string().min(1),
+  answers: z.array(
+    z.object({
+      questionId: z.string().min(1),
+      userAnswer: z.string().nullable(),
+    })
+  ),
+});

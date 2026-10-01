@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { checkQuestionAnswer, submitQuizAttempt } from "@/actions/quiz";
 import { Switch } from "@/app/_components/switch";
+import { AttemptResults, type ResultAnswer } from "@/app/_components/attempt-results";
 
 type Choice = { label: string; text: string };
 
@@ -23,6 +23,13 @@ type Feedback = {
   explanation: string | null;
 };
 
+export type QuizSubmitResult = {
+  title: string;
+  score: number;
+  totalQuestions: number;
+  answers: ResultAnswer[];
+};
+
 const TRUE_FALSE_CHOICES: Choice[] = [
   { label: "True", text: "True" },
   { label: "False", text: "False" },
@@ -35,13 +42,21 @@ function formatTime(totalSeconds: number) {
 }
 
 export function QuizForm({
-  questionSetId,
   title,
   questions,
+  onCheckAnswer,
+  onSubmit,
+  exitHref,
+  retakeHref,
 }: {
-  questionSetId: string;
   title: string;
   questions: QuizQuestion[];
+  onCheckAnswer: (questionId: string, userAnswer: string | null) => Promise<Feedback>;
+  onSubmit: (
+    answers: { questionId: string; userAnswer: string | null }[]
+  ) => Promise<QuizSubmitResult | void>;
+  exitHref: string;
+  retakeHref: string;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<"start" | "question">("start");
@@ -54,6 +69,10 @@ export function QuizForm({
   const [secondsLeft, setSecondsLeft] = useState(() => Math.max(300, questions.length * 120));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Only ever set for a caller whose onSubmit doesn't redirect (the
+  // anonymous shared-quiz path) — when it is, render results inline instead
+  // of relying on navigation.
+  const [localResult, setLocalResult] = useState<QuizSubmitResult | null>(null);
 
   // The countdown's interval must always see the latest answers when it
   // auto-submits, so state is mirrored into a ref rather than read from the
@@ -79,13 +98,13 @@ export function QuizForm({
     setIsSubmitting(true);
 
     try {
-      await submitQuizAttempt({
-        questionSetId,
-        answers: questions.map((q) => ({
+      const result = await onSubmit(
+        questions.map((q) => ({
           questionId: q.id,
           userAnswer: answersRef.current[q.id] ?? null,
-        })),
-      });
+        }))
+      );
+      if (result) setLocalResult(result);
     } catch (err) {
       submittedRef.current = false;
       setIsSubmitting(false);
@@ -133,11 +152,10 @@ export function QuizForm({
     setError(null);
     setIsChecking(true);
     try {
-      const result = await checkQuestionAnswer({
-        questionSetId,
-        questionId: question.id,
-        userAnswer: overrideAnswer ?? answersRef.current[question.id] ?? null,
-      });
+      const result = await onCheckAnswer(
+        question.id,
+        overrideAnswer ?? answersRef.current[question.id] ?? null
+      );
       setFeedbackByQuestionId((prev) => ({ ...prev, [question.id]: result }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't check that answer.");
@@ -172,7 +190,7 @@ export function QuizForm({
       return;
     }
     if (window.confirm("Exit this quiz? Your progress won't be saved.")) {
-      router.push("/dashboard");
+      router.push(exitHref);
     }
   }
 
@@ -183,6 +201,20 @@ export function QuizForm({
   const isFlagged = !!flagged[question.id];
   const lowTime = secondsLeft < 60;
   const needsCheck = instantFeedback && question.type === "IDENTIFICATION" && !feedback;
+
+  if (localResult) {
+    return (
+      <AttemptResults
+        title={localResult.title}
+        score={localResult.score}
+        totalQuestions={localResult.totalQuestions}
+        answers={localResult.answers}
+        backHref={exitHref}
+        backLabel="Back"
+        retakeHref={retakeHref}
+      />
+    );
+  }
 
   if (step === "start") {
     const estimatedMinutes = Math.ceil(Math.max(300, total * 120) / 60);
