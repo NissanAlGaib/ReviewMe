@@ -123,14 +123,20 @@ export function QuizForm({
     });
   }
 
-  async function checkCurrentAnswer() {
+  // Accepts the answer explicitly rather than reading `answers` state,
+  // since a caller that just selected a choice (setAnswer schedules a state
+  // update, it doesn't apply it synchronously) would otherwise race and
+  // check the *previous* answer. Falls back to the ref (kept in sync by
+  // setAnswer) for the "Check answer" button path, where the answer was
+  // already committed by an earlier render.
+  async function checkCurrentAnswer(overrideAnswer?: string) {
     setError(null);
     setIsChecking(true);
     try {
       const result = await checkQuestionAnswer({
         questionSetId,
         questionId: question.id,
-        userAnswer: answers[question.id] ?? null,
+        userAnswer: overrideAnswer ?? answersRef.current[question.id] ?? null,
       });
       setFeedbackByQuestionId((prev) => ({ ...prev, [question.id]: result }));
     } catch (err) {
@@ -144,7 +150,7 @@ export function QuizForm({
     if (feedback) return; // locked once this question has been checked
     setAnswer(label);
     if (instantFeedback) {
-      void checkCurrentAnswer();
+      void checkCurrentAnswer(label);
     }
   }
 
@@ -359,7 +365,7 @@ export function QuizForm({
           )}
           <button
             type="button"
-            onClick={needsCheck ? checkCurrentAnswer : goNext}
+            onClick={needsCheck ? () => checkCurrentAnswer() : goNext}
             disabled={isSubmitting || isChecking}
             className="flex h-[52px] flex-1 items-center justify-center rounded-xl bg-chrome px-2 text-center font-sans text-[15px] font-bold tracking-[-.01em] text-chrome-foreground disabled:opacity-50"
           >
