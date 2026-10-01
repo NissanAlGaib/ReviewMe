@@ -315,13 +315,13 @@ export function QuestionEditor({
       ))}
       </div>
 
-      <div className="sticky bottom-0 z-10 -mx-7 mt-[14px] flex flex-col gap-3 border-t-[1.5px] border-ink bg-paper px-7 py-4">
+      <div className="sticky bottom-0 z-10 -mx-4 mt-[14px] flex flex-col gap-3 border-t-[1.5px] border-ink bg-paper px-4 py-4 sm:-mx-7 sm:px-7">
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <button
             type="button"
             onClick={addQuestion}
-            className="flex h-[42px] w-fit items-center rounded-[10px] border-[1.5px] border-ink px-[18px] font-sans text-[13px] font-bold text-ink"
+            className="flex h-[42px] w-full items-center justify-center rounded-[10px] border-[1.5px] border-ink px-[18px] font-sans text-[13px] font-bold text-ink sm:w-fit sm:justify-start"
           >
             + Add question
           </button>
@@ -330,7 +330,7 @@ export function QuestionEditor({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex h-[46px] w-fit items-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50"
+            className="flex h-[46px] w-full items-center justify-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50 sm:w-fit sm:justify-start"
           >
             {isSaving ? "Saving…" : "Save and mark ready"}
           </button>

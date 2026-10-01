@@ -142,15 +142,15 @@ export function QuizForm({
             type="button"
             onClick={handleBack}
             aria-label={index === 0 ? "Exit quiz" : "Previous question"}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-cream/35 font-sans text-[17px] font-semibold"
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-full border border-cream/35 font-sans text-[17px] font-semibold"
           >
             {index === 0 ? "×" : "‹"}
           </button>
-          <div className="font-mono text-[11px] font-semibold uppercase tracking-[.09em] opacity-75">
+          <div className="min-w-0 flex-1 truncate px-2 text-center font-mono text-[11px] font-semibold uppercase tracking-[.09em] opacity-75">
             {question.topic || "General"}
           </div>
           <div
-            className={`font-mono text-base font-bold ${lowTime ? "text-red-400" : "text-cream"}`}
+            className={`flex-none font-mono text-base font-bold ${lowTime ? "text-red-400" : "text-cream"}`}
           >
             {formatTime(secondsLeft)}
           </div>

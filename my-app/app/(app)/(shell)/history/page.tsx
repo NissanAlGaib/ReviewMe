@@ -24,16 +24,16 @@ export default async function HistoryPage() {
               <Link
                 key={attempt.id}
                 href={`/question-sets/${attempt.questionSetId}/attempts/${attempt.id}`}
-                className="ticket-row flex overflow-hidden rounded-[14px] border-[1.5px] border-ink bg-paper no-underline"
+                className="ticket-row flex flex-col overflow-hidden rounded-[14px] border-[1.5px] border-ink bg-paper no-underline sm:flex-row"
               >
-                <div className="flex w-[84px] flex-none flex-col items-center justify-center gap-0.5 border-r-2 border-dashed border-cream/40 bg-ink text-cream">
+                <div className="flex w-full flex-none flex-col items-center justify-center gap-0.5 border-b-2 border-dashed border-cream/40 bg-ink py-2 text-cream sm:w-[84px] sm:border-b-0 sm:border-r-2 sm:py-0">
                   <span className="font-mono text-base font-bold">
                     {attempt.score}/{attempt.totalQuestions}
                   </span>
                 </div>
-                <div className="flex flex-1 items-center justify-between gap-3 px-5 py-3.5">
-                  <div>
-                    <div className="font-sans text-sm font-bold text-ink">
+                <div className="flex min-w-0 flex-1 flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5">
+                  <div className="min-w-0">
+                    <div className="truncate font-sans text-sm font-bold text-ink">
                       {attempt.questionSet.title}
                     </div>
                     <div className="mt-0.5 font-sans text-xs font-medium text-muted">

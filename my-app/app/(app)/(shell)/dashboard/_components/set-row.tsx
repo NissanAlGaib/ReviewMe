@@ -39,7 +39,7 @@ export function SetRow({ set }: { set: SetRowData }) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="ticket-row flex overflow-hidden rounded-[14px] border-[1.5px] border-ink bg-paper">
+      <div className="ticket-row flex flex-col overflow-hidden rounded-[14px] border-[1.5px] border-ink bg-paper sm:flex-row">
         <Link
           href={
             set.status === "READY"
@@ -48,15 +48,15 @@ export function SetRow({ set }: { set: SetRowData }) {
           }
           className="flex flex-1 items-stretch no-underline"
         >
-          <div className="flex w-[84px] flex-none flex-col items-center justify-center gap-0.5 border-r-2 border-dashed border-cream/40 bg-ink text-cream">
+          <div className="flex w-[64px] flex-none flex-col items-center justify-center gap-0.5 border-r-2 border-dashed border-cream/40 bg-ink text-cream sm:w-[84px]">
             <span className="font-mono text-xl font-bold">{set.questionCount}</span>
             <span className="font-mono text-[9px] font-semibold tracking-[.06em] opacity-70">
               ITEMS
             </span>
           </div>
-          <div className="flex flex-1 items-center justify-between gap-3 px-5 py-3.5">
-            <div>
-              <div className="font-sans text-sm font-bold text-ink">{set.title}</div>
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5">
+            <div className="min-w-0">
+              <div className="truncate font-sans text-sm font-bold text-ink">{set.title}</div>
               <div className="mt-0.5 font-sans text-xs font-medium text-muted">
                 {set.examType ? `${set.examType} · ` : ""}
                 {set.questionCount} question{set.questionCount === 1 ? "" : "s"}
@@ -65,7 +65,7 @@ export function SetRow({ set }: { set: SetRowData }) {
             <Stamp label={set.status} color={set.status === "READY" ? "green" : "amber"} />
           </div>
         </Link>
-        <div className="flex flex-none items-center gap-3 border-l border-ink/10 px-4">
+        <div className="flex flex-none items-center gap-4 border-t border-ink/10 px-4 py-2.5 sm:gap-3 sm:border-t-0 sm:border-l sm:px-4 sm:py-0">
           <Link
             href={`/question-sets/${set.id}/review`}
             className="font-sans text-xs font-semibold text-muted no-underline hover:text-ink hover:underline"

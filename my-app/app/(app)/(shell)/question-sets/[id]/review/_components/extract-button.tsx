@@ -55,7 +55,7 @@ export function ExtractButton({
         type="button"
         onClick={handleClick}
         disabled={isExtracting || !hasPending}
-        className="flex h-[46px] w-fit items-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50"
+        className="flex h-[46px] w-full items-center justify-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50 sm:w-fit sm:justify-start"
       >
         {isExtracting
           ? "Extracting questions… this can take a minute"

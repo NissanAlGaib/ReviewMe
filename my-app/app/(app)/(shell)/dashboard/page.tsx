@@ -10,9 +10,9 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3.5">
-        <div>
-          <div className="font-sans text-2xl font-extrabold tracking-tight text-ink">
+      <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="truncate font-sans text-2xl font-extrabold tracking-tight text-ink">
             Welcome, {user.name || user.email}
           </div>
           <div className="mt-[5px] font-sans text-[13px] font-medium text-muted">
@@ -21,7 +21,7 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/question-sets/new"
-          className="flex h-[46px] items-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream no-underline"
+          className="flex h-[46px] items-center justify-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream no-underline sm:justify-start"
         >
           + New question set
         </Link>

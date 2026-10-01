@@ -75,7 +75,7 @@ export function SetInfoHeader({
           </div>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={isSaving}

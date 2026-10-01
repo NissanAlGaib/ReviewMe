@@ -269,12 +269,12 @@ export function LectureUploadForm() {
         )}
         {progress && <p className="font-sans text-[13px] font-medium text-muted">{progress}</p>}
 
-        <div className="flex gap-2.5">
+        <div className="flex flex-col gap-2.5 sm:flex-row">
           <button
             type="button"
             onClick={() => setStep("upload")}
             disabled={isGenerating}
-            className="flex h-[46px] items-center rounded-xl border-[1.5px] border-ink px-[18px] font-sans text-[13px] font-semibold text-ink disabled:opacity-50"
+            className="flex h-[46px] items-center justify-center rounded-xl border-[1.5px] border-ink px-[18px] font-sans text-[13px] font-semibold text-ink disabled:opacity-50"
           >
             Back
           </button>
@@ -328,7 +328,7 @@ export function LectureUploadForm() {
         <button
           type="submit"
           disabled={isAnalyzing}
-          className="flex h-12 w-fit items-center rounded-xl bg-ink px-[22px] font-sans text-sm font-bold text-cream disabled:opacity-50"
+          className="flex h-12 w-full items-center justify-center rounded-xl bg-ink px-[22px] font-sans text-sm font-bold text-cream disabled:opacity-50 sm:w-fit sm:justify-start"
         >
           {isAnalyzing ? "Analyzing…" : "Analyze lecture with AI"}
         </button>

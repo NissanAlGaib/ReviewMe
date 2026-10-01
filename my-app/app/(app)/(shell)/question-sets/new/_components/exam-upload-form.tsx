@@ -156,7 +156,7 @@ export function ExamUploadForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-12 w-fit items-center rounded-xl bg-ink px-[22px] font-sans text-sm font-bold text-cream disabled:opacity-50"
+          className="flex h-12 w-full items-center justify-center rounded-xl bg-ink px-[22px] font-sans text-sm font-bold text-cream disabled:opacity-50 sm:w-fit sm:justify-start"
         >
           {isSubmitting ? "Uploading…" : "Upload and continue"}
         </button>
