@@ -1,21 +1,101 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f0e6;
-  --foreground: #18172f;
+  color-scheme: light;
+
+  /* Flippable — body text, card borders/dividers. */
+  --ink: #18172f;
+  /* Flippable — page backdrop. */
+  --cream: #f4f0e6;
+  /* Flippable — card/surface background. */
+  --paper: #fffdf6;
+  /* Flippable — links/accents. */
+  --amber: #b45309;
+  --amber-dark: #92400e;
+  /* Flippable — secondary/tertiary text. */
+  --muted: #6b6353;
+  --faint: #9a917a;
+
+  /* Fixed in both themes — the "stamped ink" accent bars/buttons (header
+     bars, primary CTAs, badge columns) are deliberately always-dark, never
+     theme-dependent. */
+  --chrome: #18172f;
+  --chrome-foreground: #f4f0e6;
+
+  /* Flippable — semantic status colors. */
+  --success: #166534;
+  --success-bg: #dcfce7;
+  --danger: #b91c1c;
+  --danger-bg: #fee2e2;
+  --warning: #92400e;
+  --warning-bg: #fef3c7;
+  --highlight: #faf6e9;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --ticket-shadow: 9px 9px 0 rgba(24, 23, 47, 0.92);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ink: #efe9db;
+    --cream: #131225;
+    --paper: #1c1a32;
+    --amber: #f0a84e;
+    --amber-dark: #fbbf6b;
+    --muted: #b4ac98;
+    --faint: #8a8270;
+    --success: #4ade80;
+    --success-bg: #14321f;
+    --danger: #f87171;
+    --danger-bg: #3a1618;
+    --warning: #fcd34d;
+    --warning-bg: #3a2a10;
+    --highlight: #262340;
+    --ticket-shadow: 9px 9px 0 rgba(0, 0, 0, 0.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #efe9db;
+  --cream: #131225;
+  --paper: #1c1a32;
+  --amber: #f0a84e;
+  --amber-dark: #fbbf6b;
+  --muted: #b4ac98;
+  --faint: #8a8270;
+  --success: #4ade80;
+  --success-bg: #14321f;
+  --danger: #f87171;
+  --danger-bg: #3a1618;
+  --warning: #fcd34d;
+  --warning-bg: #3a2a10;
+  --highlight: #262340;
+  --ticket-shadow: 9px 9px 0 rgba(0, 0, 0, 0.6);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-cream: #f4f0e6;
-  --color-paper: #fffdf6;
-  --color-ink: #18172f;
-  --color-amber: #b45309;
-  --color-amber-dark: #92400e;
-  --color-muted: #6b6353;
-  --color-faint: #9a917a;
-  --shadow-ticket: 9px 9px 0 rgba(24, 23, 47, 0.92);
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-amber: var(--amber);
+  --color-amber-dark: var(--amber-dark);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-chrome: var(--chrome);
+  --color-chrome-foreground: var(--chrome-foreground);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-highlight: var(--highlight);
+  --shadow-ticket: var(--ticket-shadow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -29,10 +109,14 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 a {
   color: var(--color-amber);
+  transition: color 0.15s ease;
 }
 a:hover {
   color: var(--color-amber-dark);
@@ -54,7 +138,7 @@ a:hover {
 }
 
 .stage {
-  background-image: radial-gradient(rgba(24, 23, 47, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(127, 122, 102, 0.14) 1px, transparent 1px);
   background-size: 16px 16px;
   background-color: var(--color-cream);
 }
@@ -69,15 +153,22 @@ a:hover {
   border: 1.5px solid var(--color-ink);
   border-radius: 18px;
   box-shadow: var(--shadow-ticket);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-/* Dashed perforation strip with punched-hole notches on each side. The notch
-   color must match whatever sits behind the ticket (the page's cream stage)
-   so it reads as a hole cut through the card, not a filled circle. */
+/* Dashed perforation strip, always placed directly under a chrome (fixed-dark)
+   header bar — its dashed line uses the fixed chrome-foreground color rather
+   than a flippable token, since the bar above it never changes with the
+   theme. The punched-hole notches on each side must match whatever sits
+   behind the ticket (the page's cream stage) so they read as holes cut
+   through the card, not filled circles — that part does flip with the page. */
 .perf {
   position: relative;
   height: 0;
-  border-top: 2px dashed rgba(255, 255, 255, 0.35);
+  border-top: 2px dashed color-mix(in srgb, var(--color-chrome-foreground) 35%, transparent);
 }
 .perf::before,
 .perf::after {
@@ -88,6 +179,7 @@ a:hover {
   height: 18px;
   border-radius: 50%;
   background: var(--color-cream);
+  transition: background-color 0.15s ease;
 }
 .perf::before {
   left: -9px;
@@ -107,19 +199,20 @@ a:hover {
 .field-input {
   width: 100%;
   border: none;
-  border-bottom: 2px solid rgba(24, 23, 47, 0.25);
+  border-bottom: 2px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
   background: transparent;
   padding: 8px 2px;
   font: 600 15px var(--font-sans);
   color: var(--color-ink);
   outline: none;
+  transition: border-color 0.15s ease;
 }
 .field-input:focus {
   border-bottom-color: var(--color-ink);
 }
 
 .ticket-row:hover {
-  background: #faf7ec;
+  background: var(--color-highlight);
 }
 
 .tickslider {
@@ -128,7 +221,7 @@ a:hover {
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: #efe9d8;
+  background: color-mix(in srgb, var(--color-ink) 12%, var(--color-paper));
   outline: none;
 }
 .tickslider::-webkit-slider-thumb {

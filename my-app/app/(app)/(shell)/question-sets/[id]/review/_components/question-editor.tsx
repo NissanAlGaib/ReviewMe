@@ -174,14 +174,14 @@ export function QuestionEditor({
             </span>
             <div className="flex items-center gap-3">
               {q.aiConfidence === "low" && (
-                <span className="rounded-full bg-[#fef3c7] px-2.5 py-[3px] font-sans text-[11px] font-bold text-[#92400e]">
+                <span className="rounded-full bg-warning-bg px-2.5 py-[3px] font-sans text-[11px] font-bold text-warning">
                   Low confidence — double-check
                 </span>
               )}
               <button
                 type="button"
                 onClick={() => removeQuestion(q.key)}
-                className="font-sans text-xs font-semibold text-[#b91c1c] hover:underline"
+                className="font-sans text-xs font-semibold text-danger hover:underline"
               >
                 Delete
               </button>
@@ -236,7 +236,7 @@ export function QuestionEditor({
                         onChange={(e) => updateChoice(q.key, index, { label: e.target.value })}
                         className={`w-9 rounded-lg border-[1.5px] py-1.5 text-center font-mono text-[13px] font-bold ${
                           isCorrect
-                            ? "border-ink bg-ink text-cream"
+                            ? "border-chrome bg-chrome text-chrome-foreground"
                             : "border-ink/20 bg-transparent text-ink"
                         }`}
                       />
@@ -244,13 +244,13 @@ export function QuestionEditor({
                         value={choice.text}
                         onChange={(e) => updateChoice(q.key, index, { text: e.target.value })}
                         className={`flex-1 rounded-lg border-[1.5px] px-3 py-1.5 font-sans text-[13px] outline-none focus:border-ink ${
-                          isCorrect ? "border-ink bg-[#faf6e9] font-semibold" : "border-ink/20"
+                          isCorrect ? "border-ink bg-highlight font-semibold" : "border-ink/20"
                         }`}
                       />
                       <button
                         type="button"
                         onClick={() => removeChoice(q.key, index)}
-                        className="font-sans text-xs font-semibold text-[#b91c1c] hover:underline"
+                        className="font-sans text-xs font-semibold text-danger hover:underline"
                       >
                         Remove
                       </button>
@@ -330,7 +330,7 @@ export function QuestionEditor({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex h-[46px] w-full items-center justify-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50 sm:w-fit sm:justify-start"
+            className="flex h-[46px] w-full items-center justify-center rounded-xl bg-chrome px-5 font-sans text-sm font-bold text-chrome-foreground disabled:opacity-50 sm:w-fit sm:justify-start"
           >
             {isSaving ? "Saving…" : "Save and mark ready"}
           </button>

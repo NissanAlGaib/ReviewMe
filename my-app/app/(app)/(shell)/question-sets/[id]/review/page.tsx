@@ -42,7 +42,7 @@ export default async function ReviewPage({
             <div className="flex items-center gap-2.5">
               <span
                 className={`font-mono text-[10px] font-bold tracking-[.06em] ${
-                  upload.processedAt ? "text-[#166534]" : "text-amber"
+                  upload.processedAt ? "text-success" : "text-amber"
                 }`}
               >
                 {upload.processedAt ? "PROCESSED" : "PENDING"}

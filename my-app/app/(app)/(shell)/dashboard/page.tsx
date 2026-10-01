@@ -21,7 +21,7 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/question-sets/new"
-          className="flex h-[46px] items-center justify-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream no-underline sm:justify-start"
+          className="flex h-[46px] items-center justify-center rounded-xl bg-chrome px-5 font-sans text-sm font-bold text-chrome-foreground no-underline transition-colors sm:justify-start"
         >
           + New question set
         </Link>

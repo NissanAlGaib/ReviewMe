@@ -23,7 +23,7 @@ export default function NewQuestionSetPage() {
           type="button"
           onClick={() => setMode("exam")}
           className={`rounded-[7px] px-4 py-2 font-sans text-[13px] font-bold transition-colors ${
-            mode === "exam" ? "bg-ink text-cream" : "text-ink"
+            mode === "exam" ? "bg-chrome text-chrome-foreground" : "text-ink"
           }`}
         >
           From exam questions
@@ -32,7 +32,7 @@ export default function NewQuestionSetPage() {
           type="button"
           onClick={() => setMode("lecture")}
           className={`rounded-[7px] px-4 py-2 font-sans text-[13px] font-bold transition-colors ${
-            mode === "lecture" ? "bg-ink text-cream" : "text-ink"
+            mode === "lecture" ? "bg-chrome text-chrome-foreground" : "text-ink"
           }`}
         >
           From lecture material

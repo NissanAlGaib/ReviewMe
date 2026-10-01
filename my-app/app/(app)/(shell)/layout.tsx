@@ -2,6 +2,7 @@ import { getUser } from "@/lib/dal";
 import { logout } from "@/actions/auth";
 import { NavTabs } from "./_components/nav-tabs";
 import { MobileNav } from "./_components/mobile-nav";
+import { ThemeToggle } from "@/app/_components/theme-toggle";
 
 export default async function ShellLayout({
   children,
@@ -14,10 +15,10 @@ export default async function ShellLayout({
     <div className="flex flex-1 justify-center px-0 py-0 sm:px-4 sm:py-7 sm:pb-14">
       <div className="w-full max-w-[960px]">
         <div className="ticket flex flex-col sm:rounded-[18px]">
-          <div className="flex items-center justify-between gap-3 rounded-t-[18px] bg-ink px-4 py-3.5 text-cream sm:flex-wrap sm:px-[26px] sm:py-4">
+          <div className="flex items-center justify-between gap-3 rounded-t-[18px] bg-chrome px-4 py-3.5 text-chrome-foreground sm:flex-wrap sm:px-[26px] sm:py-4">
             <div className="flex items-center gap-[9px] sm:gap-[26px]">
               <div className="flex items-center gap-[9px]">
-                <div className="font-mono flex h-[26px] w-[26px] items-center justify-center rounded-full border-[1.5px] border-dashed border-cream/50 text-[10px] font-bold">
+                <div className="font-mono flex h-[26px] w-[26px] items-center justify-center rounded-full border-[1.5px] border-dashed border-chrome-foreground/50 text-[10px] font-bold">
                   RM
                 </div>
                 <div className="font-sans text-[15px] font-extrabold tracking-tight">
@@ -35,8 +36,10 @@ export default async function ShellLayout({
                   Log out
                 </button>
               </form>
+              <ThemeToggle className="border-chrome-foreground/40 text-chrome-foreground opacity-85 hover:opacity-100" />
             </div>
-            <div className="sm:hidden">
+            <div className="flex items-center gap-2 sm:hidden">
+              <ThemeToggle className="border-chrome-foreground/40 text-chrome-foreground" />
               <MobileNav email={user.email} logout={logout} />
             </div>
           </div>

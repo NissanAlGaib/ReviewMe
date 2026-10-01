@@ -17,5 +17,11 @@ export default async function QuizPage({
     redirect(`/question-sets/${id}/review`);
   }
 
-  return <QuizForm questionSetId={questionSet.id} questions={questionSet.questions} />;
+  return (
+    <QuizForm
+      questionSetId={questionSet.id}
+      title={questionSet.title}
+      questions={questionSet.questions}
+    />
+  );
 }

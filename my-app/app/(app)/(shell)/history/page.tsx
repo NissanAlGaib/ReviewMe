@@ -26,7 +26,7 @@ export default async function HistoryPage() {
                 href={`/question-sets/${attempt.questionSetId}/attempts/${attempt.id}`}
                 className="ticket-row flex flex-col overflow-hidden rounded-[14px] border-[1.5px] border-ink bg-paper no-underline sm:flex-row"
               >
-                <div className="flex w-full flex-none flex-col items-center justify-center gap-0.5 border-b-2 border-dashed border-cream/40 bg-ink py-2 text-cream sm:w-[84px] sm:border-b-0 sm:border-r-2 sm:py-0">
+                <div className="flex w-full flex-none flex-col items-center justify-center gap-0.5 border-b-2 border-dashed border-chrome-foreground/40 bg-chrome py-2 text-chrome-foreground sm:w-[84px] sm:border-b-0 sm:border-r-2 sm:py-0">
                   <span className="font-mono text-base font-bold">
                     {attempt.score}/{attempt.totalQuestions}
                   </span>

@@ -147,7 +147,7 @@ export function FilePicker({
                 type="button"
                 onClick={() => handleRemove(i)}
                 disabled={disabled}
-                className="flex-none font-sans text-xs font-semibold text-[#b91c1c] hover:underline disabled:opacity-50"
+                className="flex-none font-sans text-xs font-semibold text-danger hover:underline disabled:opacity-50"
               >
                 Remove
               </button>

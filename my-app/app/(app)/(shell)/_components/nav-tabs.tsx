@@ -19,10 +19,10 @@ export function NavTabs() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`border-b-2 pb-[3px] font-sans text-[13px] no-underline ${
+            className={`border-b-2 pb-[3px] font-sans text-[13px] no-underline transition-colors ${
               active
-                ? "border-amber font-bold text-cream"
-                : "border-transparent font-semibold text-cream/55 hover:text-cream/80"
+                ? "border-amber font-bold text-chrome-foreground"
+                : "border-transparent font-semibold text-chrome-foreground/55 hover:text-chrome-foreground/80"
             }`}
           >
             {tab.label}

@@ -147,7 +147,7 @@ export function AddFilesForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-[42px] w-fit items-center rounded-[10px] bg-ink px-[18px] font-sans text-[13px] font-bold text-cream disabled:opacity-50"
+          className="flex h-[42px] w-fit items-center rounded-[10px] bg-chrome px-[18px] font-sans text-[13px] font-bold text-chrome-foreground disabled:opacity-50"
         >
           {isSubmitting ? "Uploading…" : "Upload"}
         </button>

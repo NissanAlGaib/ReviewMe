@@ -48,7 +48,7 @@ export function SetRow({ set }: { set: SetRowData }) {
           }
           className="flex flex-1 items-stretch no-underline"
         >
-          <div className="flex w-[64px] flex-none flex-col items-center justify-center gap-0.5 border-r-2 border-dashed border-cream/40 bg-ink text-cream sm:w-[84px]">
+          <div className="flex w-[64px] flex-none flex-col items-center justify-center gap-0.5 border-r-2 border-dashed border-chrome-foreground/40 bg-chrome text-chrome-foreground sm:w-[84px]">
             <span className="font-mono text-xl font-bold">{set.questionCount}</span>
             <span className="font-mono text-[9px] font-semibold tracking-[.06em] opacity-70">
               ITEMS
@@ -76,7 +76,7 @@ export function SetRow({ set }: { set: SetRowData }) {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="font-sans text-xs font-semibold text-[#b91c1c] hover:underline disabled:opacity-50"
+            className="font-sans text-xs font-semibold text-danger hover:underline disabled:opacity-50"
           >
             {isDeleting ? "…" : "Delete"}
           </button>

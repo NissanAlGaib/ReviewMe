@@ -82,7 +82,7 @@ export function UpdateChecker() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="flex h-9 flex-1 items-center justify-center rounded-lg bg-ink px-3 font-sans text-xs font-bold text-cream"
+            className="flex h-9 flex-1 items-center justify-center rounded-lg bg-chrome px-3 font-sans text-xs font-bold text-chrome-foreground"
           >
             Refresh
           </button>

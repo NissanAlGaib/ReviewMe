@@ -12,7 +12,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex h-[52px] w-full items-center justify-center rounded-xl bg-ink font-sans text-[15px] font-bold text-cream transition-opacity disabled:opacity-50"
+      className="flex h-[52px] w-full items-center justify-center rounded-xl bg-chrome font-sans text-[15px] font-bold text-chrome-foreground transition-opacity disabled:opacity-50"
     >
       {pending ? "Creating account…" : "Create account"}
     </button>
@@ -24,7 +24,7 @@ export default function SignupPage() {
 
   return (
     <div className="ticket flex flex-col">
-      <div className="rounded-t-[18px] bg-ink px-6 pt-6 pb-[18px] text-center text-cream">
+      <div className="rounded-t-[18px] bg-chrome px-6 pt-6 pb-[18px] text-center text-chrome-foreground">
         <div className="font-mono text-[11px] font-bold tracking-[.16em]">★ NEW MEMBER ★</div>
         <div className="mt-2 font-sans text-xl font-extrabold tracking-tight">ReviewMe</div>
       </div>

@@ -79,7 +79,7 @@ export function SetInfoHeader({
           <button
             type="submit"
             disabled={isSaving}
-            className="flex h-9 w-fit items-center rounded-[8px] bg-ink px-4 font-sans text-xs font-bold text-cream disabled:opacity-50"
+            className="flex h-9 w-fit items-center rounded-[8px] bg-chrome px-4 font-sans text-xs font-bold text-chrome-foreground disabled:opacity-50"
           >
             {isSaving ? "Saving…" : "Save"}
           </button>

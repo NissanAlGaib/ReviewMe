@@ -58,7 +58,7 @@ export default async function AttemptResultsPage({
 
   return (
     <div className="ticket flex flex-col">
-      <div className="rounded-t-[18px] bg-ink px-6 pt-7 pb-5 text-cream">
+      <div className="rounded-t-[18px] bg-chrome px-6 pt-7 pb-5 text-chrome-foreground">
         <div className="truncate font-mono text-[11px] font-semibold uppercase tracking-[.09em] opacity-70">
           {attempt.questionSet.title}
         </div>
@@ -66,11 +66,11 @@ export default async function AttemptResultsPage({
           <div
             className="flex h-[100px] w-[100px] flex-none items-center justify-center rounded-full ticket-pop"
             style={{
-              background: `conic-gradient(#f4f0e6 0 ${pct}%, rgba(244,240,230,.22) ${pct}% 100%)`,
+              background: `conic-gradient(var(--color-chrome-foreground) 0 ${pct}%, color-mix(in srgb, var(--color-chrome-foreground) 22%, transparent) ${pct}% 100%)`,
             }}
           >
-            <div className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-ink">
-              <span className="font-mono text-2xl font-bold text-cream">{pct}%</span>
+            <div className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-chrome">
+              <span className="font-mono text-2xl font-bold text-chrome-foreground">{pct}%</span>
             </div>
           </div>
           <div className="min-w-0">
@@ -91,19 +91,22 @@ export default async function AttemptResultsPage({
         </div>
         <div className="flex flex-col gap-3.5">
           {topics.map((t) => {
-            const barColor = t.ratio >= 0.85 ? "#166534" : t.ratio >= 0.6 ? "#b45309" : "#b91c1c";
+            const barColor =
+              t.ratio >= 0.85
+                ? "var(--color-success)"
+                : t.ratio >= 0.6
+                  ? "var(--color-amber)"
+                  : "var(--color-danger)";
             return (
               <div
                 key={t.name}
                 className={
-                  t.weak
-                    ? "rounded-[10px] border-[1.5px] border-[#f0c775] bg-[#fef8e8] px-3.5 py-3"
-                    : ""
+                  t.weak ? "rounded-[10px] border-[1.5px] border-warning/40 bg-warning-bg px-3.5 py-3" : ""
                 }
               >
                 <div
                   className="mb-1.5 flex justify-between font-sans text-[13px] font-semibold"
-                  style={{ color: t.weak ? "#92400e" : "#18172f" }}
+                  style={{ color: t.weak ? "var(--color-warning)" : "var(--color-ink)" }}
                 >
                   <span>{t.name}</span>
                   <span className="font-mono" style={{ color: barColor }}>
@@ -112,7 +115,11 @@ export default async function AttemptResultsPage({
                 </div>
                 <div
                   className="h-[7px] rounded"
-                  style={{ background: t.weak ? "#fef3c7" : "#efe9d8" }}
+                  style={{
+                    background: t.weak
+                      ? "var(--color-warning-bg)"
+                      : "color-mix(in srgb, var(--color-ink) 12%, var(--color-paper))",
+                  }}
                 >
                   <div
                     className="h-full rounded"
@@ -120,7 +127,7 @@ export default async function AttemptResultsPage({
                   />
                 </div>
                 {t.weak && (
-                  <div className="mt-2 font-mono text-[10.5px] font-semibold tracking-[.02em] text-[#92400e]">
+                  <div className="mt-2 font-mono text-[10.5px] font-semibold tracking-[.02em] text-warning">
                     WEAKEST AREA — FOCUS HERE NEXT
                   </div>
                 )}
@@ -141,7 +148,7 @@ export default async function AttemptResultsPage({
             <div
               key={answer.id}
               className={`flex flex-col gap-2 rounded-[10px] border-[1.5px] p-3.5 text-sm ${
-                answer.isCorrect ? "border-[#166534]/30" : "border-[#b91c1c]/40"
+                answer.isCorrect ? "border-success/30" : "border-danger/40"
               }`}
             >
               <p className="font-sans font-semibold text-ink">
@@ -173,8 +180,8 @@ export default async function AttemptResultsPage({
                 className="w-fit rounded-full px-2.5 py-[3px] font-sans text-xs font-bold"
                 style={
                   answer.isCorrect
-                    ? { background: "#dcfce7", color: "#166534" }
-                    : { background: "#fee2e2", color: "#b91c1c" }
+                    ? { background: "var(--color-success-bg)", color: "var(--color-success)" }
+                    : { background: "var(--color-danger-bg)", color: "var(--color-danger)" }
                 }
               >
                 {answer.isCorrect ? "Correct" : "Incorrect"}
@@ -193,7 +200,7 @@ export default async function AttemptResultsPage({
         </Link>
         <Link
           href={`/question-sets/${attempt.questionSet.id}/quiz`}
-          className="flex h-[50px] flex-1 items-center justify-center rounded-xl bg-ink font-sans text-sm font-bold text-cream no-underline"
+          className="flex h-[50px] flex-1 items-center justify-center rounded-xl bg-chrome font-sans text-sm font-bold text-chrome-foreground no-underline"
         >
           Retake
         </Link>

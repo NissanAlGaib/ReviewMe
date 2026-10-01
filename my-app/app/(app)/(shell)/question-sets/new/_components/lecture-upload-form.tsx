@@ -226,7 +226,7 @@ export function LectureUploadForm() {
                 onClick={() => toggleType(type)}
                 disabled={isGenerating}
                 className={`rounded-full border-[1.5px] border-ink px-3.5 py-1.5 font-sans text-xs font-semibold disabled:opacity-50 ${
-                  selectedTypes[type] ? "bg-ink text-cream" : "text-ink"
+                  selectedTypes[type] ? "bg-chrome text-chrome-foreground" : "text-ink"
                 }`}
               >
                 {QUESTION_TYPE_LABELS[type]}
@@ -245,7 +245,7 @@ export function LectureUploadForm() {
                 onClick={() => setDifficulty(d)}
                 disabled={isGenerating}
                 className={`rounded-[7px] px-4 py-2 font-sans text-[13px] font-bold disabled:opacity-50 ${
-                  difficulty === d ? "bg-ink text-cream" : "text-ink"
+                  difficulty === d ? "bg-chrome text-chrome-foreground" : "text-ink"
                 }`}
               >
                 {d}
@@ -282,7 +282,7 @@ export function LectureUploadForm() {
             type="button"
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="flex h-[46px] flex-1 items-center justify-center rounded-xl bg-ink px-5 font-sans text-sm font-bold text-cream disabled:opacity-50"
+            className="flex h-[46px] flex-1 items-center justify-center rounded-xl bg-chrome px-5 font-sans text-sm font-bold text-chrome-foreground disabled:opacity-50"
           >
             {isGenerating ? "Generating…" : `Generate ${questionCount} questions`}
           </button>
@@ -328,7 +328,7 @@ export function LectureUploadForm() {
         <button
           type="submit"
           disabled={isAnalyzing}
-          className="flex h-12 w-full items-center justify-center rounded-xl bg-ink px-[22px] font-sans text-sm font-bold text-cream disabled:opacity-50 sm:w-fit sm:justify-start"
+          className="flex h-12 w-full items-center justify-center rounded-xl bg-chrome px-[22px] font-sans text-sm font-bold text-chrome-foreground disabled:opacity-50 sm:w-fit sm:justify-start"
         >
           {isAnalyzing ? "Analyzing…" : "Analyze lecture with AI"}
         </button>
